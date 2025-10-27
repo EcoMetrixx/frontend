@@ -1,0 +1,117 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "📦 Enter Frontend DockerShell",
+      "type": "shell",
+      "command": "docker-compose exec frontend sh",
+      "problemMatcher": [],
+      "detail": "Accede a la shell dentro del contenedor 'frontend' asociado al servicio 'frontend'.",
+      "isBackground": true,
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "showReuseMessage": false,
+        "clear": false
+      }
+    },
+    {
+      "label": "🚀 Start Frontend (npm run dev)",
+      "type": "shell",
+      "command": "docker-compose exec frontend sh -c 'npm run dev'",
+      "problemMatcher": [],
+      "detail": "Entra al contenedor de 'frontend' y ejecuta 'npm run dev' para levantar la aplicación frontend.",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "showReuseMessage": false,
+        "clear": false
+      }
+    },
+    {
+      "label": "▶️ Start Frontend Container",
+      "type": "shell",
+      "command": "docker-compose up -d frontend",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": [],
+      "detail": "Levanta el contenedor del servicio 'frontend'."
+    },
+    {
+      "label": "⏸️ Stop Frontend Container",
+      "type": "shell",
+      "command": "docker-compose stop frontend",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": [],
+      "detail": "Solo detiene el contenedor del servicio 'frontend' sin eliminarlo.",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "showReuseMessage": false,
+        "clear": false
+      }
+    },
+    {
+      "label": "⏹️ Stop All Containers",
+      "type": "shell",
+      "command": "docker-compose stop",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": [],
+      "detail": "Detiene todos los contenedores, redes, volúmenes, etc., definidos en el 'docker-compose.yml'.",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new",
+        "showReuseMessage": false,
+        "clear": false
+      }
+    },
+    {
+      "label": "🔄 Restart Frontend",
+      "type": "shell",
+      "command": "docker-compose restart frontend",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": [],
+      "detail": "Reinicia el contenedor del servicio 'frontend'."
+    },
+    {
+      "label": "🔨 Rebuild Containers",
+      "type": "shell",
+      "command": "docker-compose up --build -d",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": [],
+      "detail": "Reconstruye todos los contenedores y los levanta en segundo plano."
+    },
+    {
+      "label": "🧹 Clean Docker Containers",
+      "type": "shell",
+      "command": "docker system prune -f",
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "problemMatcher": [],
+      "detail": "Elimina contenedores no utilizados, imágenes huérfanas, redes no utilizadas, etc."
+    },
+    {
+      "label": "⬇️ Install Frontend Dependencies",
+      "type": "shell",
+      "command": "docker-compose exec frontend sh -c 'npm install'",
+      "problemMatcher": [],
+      "detail": "Instala las dependencias del proyecto frontend dentro del contenedor."
+    }
+  ]
+}

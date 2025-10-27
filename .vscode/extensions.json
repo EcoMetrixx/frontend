@@ -1,0 +1,8 @@
+{
+  "recommendations": [
+    "ms-azuretools.vscode-docker",
+    "esbenp.prettier-vscode",
+    "johnpapa.vscode-peacock",
+    "christian-kohler.path-intellisense"
+  ]
+}
