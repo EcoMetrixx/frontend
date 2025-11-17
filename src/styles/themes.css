@@ -1,0 +1,17 @@
+html {
+    color-scheme: light;
+}
+
+html.dark {
+    color-scheme: dark;
+}
+
+:root {
+    /* Example */
+    background-color: var(--color-gray-100);
+}
+
+html.dark {
+    /* Example */
+    background-color: var(--color-gray-900);
+}
