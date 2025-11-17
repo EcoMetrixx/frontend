@@ -5,11 +5,20 @@ import { ErrorHandler } from "../error-handling/ErrorHandler";
 import { InvalidCredentialsError } from "../errors";
 
 const StorageKeys = {
-    USER: "user"
+    USER: "auth:user",
 } as const;
 
+const MOCK_USER = {
+    id: "advisor-001",
+    name: "Juan Torres",
+    email: "user@dwduqs.com",
+    role: "Asesor Hipotecario",
+};
+
+export type AuthUser = typeof MOCK_USER;
+
 interface AuthContextProps {
-    user: string | null;
+    user: AuthUser | null;
     login: (email: string, password: string) => Promise<void>;
     logout: () => void;
 }
@@ -19,38 +28,41 @@ const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-
-    const [user, setUser] = useState<string | null>(null);
+    const [user, setUser] = useState<AuthUser | null>(null);
 
     const login = async (email: string, password: string) => {
-        // TODO: create login logic
-
-        if (email && password) { //test
-            setUser(email); //test
-            localStorage.setItem(StorageKeys.USER, email); // test
-        } //test
-
         try {
-            if(password = "aaa"){
+            await new Promise((resolve) => setTimeout(resolve, 700));
+
+            const normalizedEmail = email.trim().toLowerCase();
+            const isValidUser = normalizedEmail === MOCK_USER.email && password === "miVivienda#2024";
+
+            if (!isValidUser) {
                 throw new InvalidCredentialsError();
             }
 
-        } catch (error){
+            setUser(MOCK_USER);
+            localStorage.setItem(StorageKeys.USER, JSON.stringify(MOCK_USER));
+        } catch (error) {
             ErrorHandler.handle(error);
             throw error;
         }
-    }
+    };
 
     const logout = () => {
-        // TODO: create logout logic
-
-        setUser(null); // test
-        localStorage.removeItem(StorageKeys.USER) //test
-    }
+        setUser(null);
+        localStorage.removeItem(StorageKeys.USER);
+    };
 
     useEffect(() => {
-        const storedUser = localStorage.getItem(StorageKeys.USER);
-        if (storedUser) setUser(storedUser);
+        try {
+            const storedUser = localStorage.getItem(StorageKeys.USER);
+            if (storedUser) {
+                setUser(JSON.parse(storedUser));
+            }
+        } catch {
+            localStorage.removeItem(StorageKeys.USER);
+        }
     }, []);
 
 
@@ -63,6 +75,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
-    if(!context) throw new Error("useAuth debe usarse dentro de un AuthProvider");
+    if (!context) throw new Error("useAuth debe usarse dentro de un AuthProvider");
     return context;
 };
