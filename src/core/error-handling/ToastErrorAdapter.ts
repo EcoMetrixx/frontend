@@ -1,34 +1,30 @@
 import toast from "react-hot-toast";
 import {
   AppError,
+  ErrorCode,
   ErrorCodes,
 } from "@/core/errors";
 
+const ERROR_MESSAGES: Record<ErrorCode, string> = {
+  [ErrorCodes.AUTH_INVALID_CREDENTIALS]: "Credenciales Incorrectas",
+  [ErrorCodes.AUTH_UNAUTHORIZED]: "Acceso denegado",
+  [ErrorCodes.NETWORK_CONNECTION_FAILED]: "Sin conexion",
+  [ErrorCodes.NETWORK_TIMEOUT]: "El servidor no respondió",
+  [ErrorCodes.VALIDATION_INVALID_DATA]: "Valor invalido",
+  [ErrorCodes.VALIDATION_REQUIRED_FIELD]: "" // Note: se usa error.message
+};
+
 export class ToastErrorAdapter {
   static show(error: AppError) {
-    switch (error.code) {
-      case ErrorCodes.AUTH_INVALID_CREDENTIALS:
-        toast.error("Credenciales incorrectas. Inténtalo nuevamente.");
-        break;
+    const defaultMsg = "Ocurrió un error inesperado";
 
-      case ErrorCodes.AUTH_UNAUTHORIZED:
-        toast.error("Acceso denegado.");
-        break;
+    const predefined = ERROR_MESSAGES[error.code];
 
-      case ErrorCodes.NETWORK_CONNECTION_FAILED:
-        toast.error("Sin conexión. Revisa tu internet.");
-        break;
+    const message =
+      predefined !== undefined
+        ? (predefined || error.message)
+        : defaultMsg;
 
-      case ErrorCodes.NETWORK_TIMEOUT:
-        toast.error("El servidor no respondió a tiempo.");
-        break;
-
-      case ErrorCodes.VALIDATION_REQUIRED_FIELD:
-        toast.error(error.message);
-        break;
-
-      default:
-        toast.error("Ocurrió un error inesperado.");
-    }
+    toast.error(message);
   }
 }
