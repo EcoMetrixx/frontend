@@ -1,5 +1,6 @@
 import Providers from "@/core/providers"
 import { Toaster } from "react-hot-toast"
+import "@/styles/globals.css";
 
 export const metadata = {
   title: "Ecometrix",
