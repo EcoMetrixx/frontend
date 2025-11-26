@@ -1,0 +1,1271 @@
+/* Dashboard Layout Styles */
+.dashboardContainer {
+    display: flex;
+    min-height: 100vh;
+    background-color: #f8fafc;
+}
+
+/* Sidebar Styles */
+.sidebar {
+    display: none;
+    width: 16rem;
+    flex-shrink: 0;
+    flex-direction: column;
+    background-color: #1e293b;
+    padding: 1.5rem;
+}
+
+.sidebarLogo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+}
+
+.sidebarLogoIcon {
+    display: flex;
+    height: 2.5rem;
+    width: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.75rem;
+    background-color: #3b82f6;
+    overflow: hidden;
+}
+
+.sidebarLogoImage {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.sidebarLogoText {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+}
+
+.sidebarTitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: white;
+}
+
+.sidebarNav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.navItem {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    gap: 0.75rem;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    transition: all 0.2s;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #cbd5e1;
+    text-align: left;
+}
+
+.navItem:hover {
+    background-color: #334155;
+    color: #e2e8f0;
+}
+
+.navItemActive {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.navItemIcon {
+    height: 1.25rem;
+    width: 1.25rem;
+    flex-shrink: 0;
+}
+
+/* Main Content Area */
+.mainContent {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+/* Header Styles */
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background-color: white;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.headerLogoIcon {
+    height: 2rem;
+    width: 2rem;
+    object-fit: contain;
+    color: #3b82f6;
+}
+
+.headerLogoText {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.headerRight {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.headerUser {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #475569;
+}
+
+.headerUserIcon {
+    height: 1.5rem;
+    width: 1.5rem;
+    border-radius: 9999px;
+    background-color: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+}
+
+/* Content Area */
+.contentArea {
+    flex: 1;
+    padding: 1.5rem;
+    overflow-y: auto;
+}
+
+.contentGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Active Client Banner */
+.activeClientBanner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    border-radius: 0.75rem;
+    background-color: #d1fae5;
+    padding: 0.875rem 1rem;
+    font-size: 0.875rem;
+    color: #065f46;
+}
+
+.activeClientBannerContent {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.activeClientBannerIcon {
+    height: 0.75rem;
+    width: 0.75rem;
+    border-radius: 9999px;
+    background-color: #10b981;
+    flex-shrink: 0;
+}
+
+.activeClientBannerClose {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #065f46;
+    padding: 0.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s;
+}
+
+.activeClientBannerClose:hover {
+    background-color: rgba(6, 95, 70, 0.1);
+}
+
+.activeClientBannerCloseIcon {
+    height: 1rem;
+    width: 1rem;
+}
+
+/* Dashboard Title Section */
+.dashboardTitleSection {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.dashboardTitle {
+    font-size: 1.875rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.registerClientButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 0.75rem;
+    background-color: #3b82f6;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+.registerClientButton:hover {
+    background-color: #2563eb;
+}
+
+.registerClientButtonIcon {
+    height: 1rem;
+    width: 1rem;
+}
+
+/* Card Styles */
+.card {
+    border-radius: 1rem;
+    background-color: white;
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+}
+
+.card+.card {
+    margin-top: 1.5rem;
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.cardTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.cardDescription {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin-top: 0.25rem;
+}
+
+.cardActions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Filter Card */
+.filterGrid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+
+.filterField {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filterLabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+}
+
+.filterSelect {
+    width: 100%;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+    padding: 0.625rem 0.875rem;
+    font-size: 0.875rem;
+    color: #475569;
+    background-color: white;
+    transition: border-color 0.2s;
+}
+
+.filterSelect:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Button Styles */
+.buttonPrimary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 0.75rem;
+    background-color: #3b82f6;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.buttonPrimary:hover {
+    background-color: #2563eb;
+}
+
+.buttonSecondary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+    background-color: white;
+    padding: 0.625rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #475569;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.buttonSecondary:hover {
+    background-color: #f8fafc;
+}
+
+.buttonIcon {
+    height: 1rem;
+    width: 1rem;
+}
+
+.buttonPrimary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.actionBlue {
+    background-color: #2563eb;
+}
+
+.actionBlue:hover {
+    background-color: #1d4ed8;
+}
+
+.actionGreen {
+    background-color: #059669;
+}
+
+.actionGreen:hover {
+    background-color: #047857;
+}
+
+.actionPurple {
+    background-color: #7c3aed;
+}
+
+.actionPurple:hover {
+    background-color: #6d28d9;
+}
+
+/* Table Styles */
+.tableContainer {
+    margin-top: 1rem;
+    overflow-x: auto;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.tableHeader {
+    text-align: left;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+    padding: 0.75rem 0.75rem;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.tableRow {
+    border-bottom: 1px solid #f1f5f9;
+    transition: background-color 0.2s;
+}
+
+.tableRow:hover {
+    background-color: #f8fafc;
+}
+
+.tableCell {
+    padding: 1rem 0.75rem;
+    font-size: 0.875rem;
+    color: #475569;
+}
+
+.clientCell {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.clientAvatar {
+    display: flex;
+    height: 2.5rem;
+    width: 2.5rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 9999px;
+    background-color: #e0e7ff;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4f46e5;
+    flex-shrink: 0;
+}
+
+.clientInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+}
+
+.clientName {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.clientEmail {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+/* Badge Styles */
+.badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.badgeGreen {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+.badgeBlue {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.badgeYellow {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.badgeRed {
+    background-color: #fee2e2;
+    color: #991b1b;
+}
+
+.badgeGrey {
+    background-color: #f1f5f9;
+    color: #475569;
+}
+
+/* Action Buttons */
+.actionButtons {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.actionButton {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #64748b;
+    padding: 0.375rem;
+    border-radius: 0.375rem;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.actionButton:hover {
+    background-color: #f1f5f9;
+    color: #3b82f6;
+}
+
+.actionButtonIcon {
+    height: 1.125rem;
+    width: 1.125rem;
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.paginationInfo {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.paginationControls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.paginationButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 2rem;
+    width: 2rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e2e8f0;
+    background-color: white;
+    color: #475569;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.paginationButton:hover {
+    background-color: #f8fafc;
+    border-color: #cbd5e1;
+}
+
+.paginationButtonActive {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+    color: white;
+}
+
+.paginationButtonActive:hover {
+    background-color: #2563eb;
+    border-color: #2563eb;
+}
+
+/* Housing view */
+.housingHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.housingHeadline {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.housingSubheadline {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: #475569;
+}
+
+.housingBadgeHighlight {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 0.5rem;
+    background-color: #d1fae5;
+    padding: 0.125rem 0.5rem;
+    font-weight: 600;
+    color: #047857;
+}
+
+.housingSummary {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.housingSummaryLabel {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #94a3b8;
+}
+
+.housingSummaryValue {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.housingFiltersGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.housingChips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.housingChip {
+    border-radius: 9999px;
+    background-color: #e0f2fe;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #0369a1;
+}
+
+.housingChipReset {
+    border: none;
+    background: none;
+    color: #3b82f6;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.housingCardsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+}
+
+.housingCard {
+    border: 1px solid #e2e8f0;
+    border-radius: 1rem;
+    display: flex;
+    flex-direction: column;
+    background-color: #f8fafc;
+    overflow: hidden;
+}
+
+.housingCardImageWrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 60%;
+    overflow: hidden;
+}
+
+.housingCardImage {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.housingCardBadges {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.housingCardBody {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    flex: 1;
+}
+
+.housingCardTitle {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.housingCardMeta {
+    font-size: 0.875rem;
+    color: #64748b;
+}
+
+.housingCardInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.875rem;
+    color: #475569;
+}
+
+.housingCardInfo p {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0;
+}
+
+.housingCardIcon {
+    height: 1rem;
+    width: 1rem;
+    color: #3b82f6;
+}
+
+.housingCardFooter {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.housingPriceBlock {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.housingCardPrice {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.housingMetrics {
+    font-size: 0.875rem;
+    color: #0f172a;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.housingCardActions {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-top: 1px solid #e2e8f0;
+    background-color: white;
+}
+
+.housingBadge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 9999px;
+    padding: 0.25rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.housingBadgeGreen {
+    background-color: #d1fae5;
+    color: #047857;
+}
+
+.housingBadgeBlue {
+    background-color: #dbeafe;
+    color: #1e40af;
+}
+
+.housingBadgeOrange {
+    background-color: #fef3c7;
+    color: #92400e;
+}
+
+.housingBadgeGrey {
+    background-color: #e2e8f0;
+    color: #475569;
+}
+
+/* Simulation view */
+.simulationLayout {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+    gap: 1.5rem;
+}
+
+.simulationLeft {
+    display: flex;
+}
+
+.simulationCard {
+    background-color: white;
+    border-radius: 1rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 1.5rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.simulationHeader {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.simulationTitleGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.simulationHeadline {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.simulationSubheadline {
+    font-size: 0.875rem;
+    color: #475569;
+}
+
+.simulationTabs {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.simulationTab {
+    flex: 1;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.75rem;
+    background-color: #f8fafc;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.simulationTabActive {
+    background-color: #e0f2fe;
+    border-color: #38bdf8;
+    color: #0369a1;
+}
+
+.simulationFields {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.simulationField {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.simulationFieldLabel {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #64748b;
+}
+
+.simulationFieldInput,
+.simulationFieldSelect {
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+    padding: 0.75rem 0.875rem;
+    font-size: 0.875rem;
+    color: #0f172a;
+    background-color: #f8fafc;
+}
+
+.simulationFieldHelper {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.simulationBadge {
+    grid-column: 1 / -1;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-radius: 0.75rem;
+    background-color: #d1fae5;
+    color: #047857;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.simulationBadgeIcon {
+    height: 1rem;
+    width: 1rem;
+}
+
+.simulationActions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.simulationRight {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.simulationSummaryCard,
+.simulationIndicatorsCard,
+.simulationExportCard {
+    background-color: white;
+    border-radius: 1rem;
+    padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.simulationSectionTitle {
+    font-size: 0.875rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 0.75rem;
+}
+
+.simulationSummaryList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.simulationSummaryItem {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: #475569;
+}
+
+.summaryHighlight {
+    color: #dc2626;
+}
+
+.summaryEmphasis {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.simulationIndicatorList {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.simulationIndicator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f8fafc;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+}
+
+.simulationIndicatorLabel {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.simulationIndicatorDescription {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.simulationExportActions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.simulationExportButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.75rem;
+    border: 1px solid #fecaca;
+    background-color: #fee2e2;
+    color: #b91c1c;
+    padding: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.simulationExportButtonSecondary {
+    border-color: #bbf7d0;
+    background-color: #dcfce7;
+    color: #15803d;
+}
+
+.simulationExportIcon {
+    height: 1rem;
+    width: 1rem;
+}
+
+/* Responsive adjustments */
+@media (min-width: 1024px) {
+    .sidebar {
+        display: flex;
+    }
+
+    .filterGrid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 1023px) {
+    .header {
+        padding: 1rem;
+    }
+
+    .contentArea {
+        padding: 1rem;
+    }
+
+    .dashboardTitle {
+        font-size: 1.5rem;
+    }
+
+    .simulationLayout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 640px) {
+    .card {
+        padding: 1rem;
+    }
+
+    .tableContainer {
+        overflow-x: scroll;
+    }
+
+    .pagination {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .simulationActions {
+        flex-direction: column;
+    }
+}
+
+/* Loan Results Dashboard Styles */
+.loanResultsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+.loanResultsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.loanResultsTitle {
+    font-size: 1.875rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+
+.loanSummaryCard {
+    background-color: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+}
+
+.loanSectionTitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: #0f172a;
+    margin-bottom: 1rem;
+}
+
+.loanSummaryGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.loanSummaryItem {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.loanSummaryLabel {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #64748b;
+}
+
+.loanSummaryValue {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #0f172a;
+}
+
+.loanSummaryHighlight {
+    background-color: #d1fae5;
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    display: inline-block;
+    width: fit-content;
+}
+
+.loanChartsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.loanChartCard {
+    background-color: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+}
+
+.loanChartPlaceholder {
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8fafc;
+    border-radius: 0.5rem;
+    border: 2px dashed #cbd5e1;
+}
+
+.loanChartPlaceholderText {
+    color: #64748b;
+    text-align: center;
+    padding: 1rem;
+}
+
+.loanScheduleCard {
+    background-color: white;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+}
+
+.loanScheduleHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.loanScheduleNote {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: #64748b;
+    text-align: center;
+}
+
+.loanTransparencyCard {
+    background-color: #fef3c7;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    border: 1px solid #fde68a;
+}
+
+.loanTransparencyContent {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.loanTransparencyItem {
+    font-size: 0.875rem;
+    color: #78350f;
+    line-height: 1.6;
+}
+
+.loanTransparencyImportant {
+    margin-top: 0.5rem;
+    padding: 1rem;
+    background-color: #fde68a;
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    color: #78350f;
+    line-height: 1.6;
+}
+
+.loanActionsFooter {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    padding: 1.5rem 0;
+}
+
+.actionRed {
+    background-color: #ef4444;
+}
+
+.actionRed:hover {
+    background-color: #dc2626;
+}
+
+.actionPurple {
+    background-color: #9333ea;
+}
+
+.actionPurple:hover {
+    background-color: #7e22ce;
+}
