@@ -379,11 +379,13 @@ function runLocalSimulationFromPayload(
         payment = 0;
         principal = 0;
         balance += interest;
-      } else if (graceMode === "PARTIAL") {
-        // solo se pagan intereses
-        payment = interest;
-        principal = 0;
-        // saldo se mantiene
+      } else if (k <= graceMonths) {
+              if (graceMode === "PARTIAL") {
+                // solo intereses
+                payment = interest;
+                principal = 0;
+                // saldo se mantiene
+              }
       } else {
         // graciaMode = NONE (por si graceMonths > 0 pero sin modo explícito)
         payment = monthlyPayment;
@@ -473,6 +475,83 @@ function getAvailabilityVariant(status?: string): "blue" | "orange" | "grey" {
       return "grey";
   }
 }
+// ==== STORAGE DE SIMULACIONES POR CLIENTE (LOCALSTORAGE) ==== //
+
+export interface StoredSimulationData {
+  clientId: string;
+  simulationId?: string | null;
+  createdAt: string;
+  currency: "PEN" | "USD";
+  summary: {
+    amount: number | null;
+    termYears: number | null;
+    monthlyPayment: number | null;
+    totalInterests: number | null;
+    totalPayable: number | null;
+    tcea: number | string | null;
+    van: number | string | null;
+    tir: number | string | null;
+  };
+  schedule: AmortizationRow[];
+  property: {
+    id: string;
+    name: string;
+  };
+  bank: {
+    id?: string | null;
+    name: string;
+  };
+}
+
+const SIMULATION_STORAGE_KEY = "ecometrix_client_simulations_v1";
+
+function readStoredSimulations(): StoredSimulationData[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(SIMULATION_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeStoredSimulations(list: StoredSimulationData[]) {
+  if (typeof window === "undefined") return;
+  try {
+    window.localStorage.setItem(
+      SIMULATION_STORAGE_KEY,
+      JSON.stringify(list)
+    );
+  } catch {}
+}
+
+function getStoredSimulationForClient(
+  clientId: string
+): StoredSimulationData | null {
+  const all = readStoredSimulations();
+  return all.find((s) => s.clientId === clientId) ?? null;
+}
+
+function upsertStoredSimulation(sim: StoredSimulationData) {
+  const all = readStoredSimulations();
+  const idx = all.findIndex((s) => s.clientId === sim.clientId);
+  if (idx >= 0) {
+    all[idx] = sim;
+  } else {
+    all.push(sim);
+  }
+  writeStoredSimulations(all);
+}
+
+function clearStoredSimulationForClient(clientId: string) {
+  const all = readStoredSimulations().filter(
+    (s) => s.clientId !== clientId
+  );
+  writeStoredSimulations(all);
+}
+
 
 // ==== REGIONES Y PROVINCIAS PERÚ ==== //
 const PERU_REGIONS = [
@@ -782,19 +861,32 @@ export function DashboardShell({ user, onLogout }: DashboardShellProps) {
     interestRate?: number;
   }>({});
 
-  const [simulationAdvanced, setSimulationAdvanced] = useState<{
-    showDayBreakdown: boolean;
-    calculateVan: boolean;
-    calculateTir: boolean;
-    discountRate: number;
-    currency: "PEN" | "USD";
-  }>({
-    showDayBreakdown: false,
-    calculateVan: true,
-    calculateTir: true,
-    discountRate: 10,
-    currency: "PEN",
-  });
+const [simulationAdvanced, setSimulationAdvanced] = useState<{
+  showDailyBreakdown: boolean;
+  calculateVan: boolean;
+  calculateTir: boolean;
+  discountRate: number;
+  currency: "PEN" | "USD";
+}>({
+  showDailyBreakdown: false,
+  calculateVan: true,
+  calculateTir: true,
+  discountRate: 10,
+  currency: "PEN",
+});
+
+const [storedSimulation, setStoredSimulation] =
+  useState<StoredSimulationData | null>(null);
+
+  useEffect(() => {
+    if (!activeClient) {
+      setStoredSimulation(null);
+      return;
+    }
+    const stored = getStoredSimulationForClient(activeClient.id);
+    setStoredSimulation(stored);
+  }, [activeClient]);
+
 
   const [calculationSummary, setCalculationSummary] = useState<{
     amount: number | null;
@@ -1182,6 +1274,32 @@ export function DashboardShell({ user, onLogout }: DashboardShellProps) {
     }
   };
 
+  const resetSimulationState = () => {
+    setSelectedProperty(null);
+    setSelectedBank(null);
+    setCurrentSimulation(null);
+    setSavedSimulationId(null);
+    setSimulationInputs({});
+    setCalculationSummary(null);
+    setSimulationAdvanced({
+      showDailyBreakdown: false,
+      calculateVan: true,
+      calculateTir: true,
+      discountRate: 10,
+      currency: "PEN",
+    });
+  };
+
+  const startNewSimulation = () => {
+    if (activeClient) {
+      clearStoredSimulationForClient(activeClient.id);
+      setStoredSimulation(null);
+    }
+    resetSimulationState();
+    setActiveNav("projects");
+  };
+
+
  const buildCalculationPayload = (): CalculateSimulationRequest | null => {
    if (!activeClient || !selectedProperty || !selectedBank) {
      setSimulationError(
@@ -1366,7 +1484,9 @@ const normalizeCalculation = (
   };
 };
 
-  const buildCreateSimulationPayload = (): CreateSimulationRequest | null => {
+  const buildCreateSimulationPayload = (
+    calcInput: CalculateSimulationRequest
+  ): CreateSimulationRequest | null => {
     if (
       !activeClient ||
       !selectedProperty ||
@@ -1377,11 +1497,6 @@ const normalizeCalculation = (
       setSimulationError(
         "Debes tener un cliente, una vivienda, un banco y haber calculado el crédito antes de guardarlo."
       );
-      return null;
-    }
-
-    const calcInput = buildCalculationPayload();
-    if (!calcInput) {
       return null;
     }
 
@@ -1412,7 +1527,6 @@ const normalizeCalculation = (
       result: resultPayload,
     };
   };
-
    const getEstimatedLoanAmount = (): number | null => {
      if (!selectedProperty) return null;
 
@@ -1504,29 +1618,66 @@ const handleCalculateSimulation = async () => {
 
 
   const handleSaveSimulation = async () => {
-    const payload = buildCreateSimulationPayload();
-    if (!payload) return;
+    const calcPayload = buildCalculationPayload();
+    if (!calcPayload) return;
+
+    const createPayload = buildCreateSimulationPayload(calcPayload);
+    if (!createPayload) return;
 
     try {
       setSimulationLoading(true);
       setSimulationError(null);
 
-      const saved = await createSimulation(payload);
+      const saved = await createSimulation(createPayload);
       setCurrentSimulation(saved);
       setSavedSimulationId(saved.id ?? null);
-      setCalculationSummary(
-        normalizeCalculation(saved as any, {
-          amount: payload.amount,
-          term: payload.term,
-          interestRate: 0,
-          gracePeriod: 0,
-          adminFees: 0,
-          evaluationFee: 0,
-          lifeInsurance: 0,
-          currency: "PEN",
-          paymentFrequency: "monthly",
-        })
-      );
+
+      const normalized = normalizeCalculation(saved as any, calcPayload);
+
+      const summary = {
+        amount: normalized.amount ?? calcPayload.amount,
+        termYears: normalized.termYears ?? calcPayload.term,
+        monthlyPayment:
+          normalized.monthlyPayment ??
+          calculationSummary?.monthlyPayment ??
+          null,
+        totalInterests: normalized.totalInterests,
+        totalPayable: normalized.totalPayable,
+        tcea: normalized.tcea,
+        van: normalized.van,
+        tir: normalized.tir,
+      };
+
+      setCalculationSummary(summary);
+
+      // 👇 Guardamos en localStorage por cliente
+      if (activeClient && selectedProperty && selectedBank) {
+        const scheduleFromServer =
+          (saved as any)?.result?.schedule ??
+          (currentSimulation as any)?.result?.schedule ??
+          [];
+
+        const toStore: StoredSimulationData = {
+          clientId: activeClient.id,
+          simulationId: saved.id ?? null,
+          createdAt: new Date().toISOString(),
+          currency: simulationAdvanced.currency,
+          summary,
+          schedule: scheduleFromServer,
+          property: {
+            id: selectedProperty.id,
+            name: selectedProperty.name,
+          },
+          bank: {
+            id: selectedBank.id ?? "",
+            name: selectedBank.name,
+          },
+        };
+
+        upsertStoredSimulation(toStore);
+        setStoredSimulation(toStore);
+      }
+
       alert("Simulación guardada correctamente.");
     } catch (err: any) {
       console.error("Error guardando simulación", err);
@@ -1537,6 +1688,7 @@ const handleCalculateSimulation = async () => {
       setSimulationLoading(false);
     }
   };
+
 
   const handleExportPdfClick = async () => {
     if (!savedSimulationId) {
@@ -2415,25 +2567,67 @@ const getSimulationSummary = () => {
           </div>
 
           <div className={styles.housingFiltersGrid}>
-            <div className={styles.card}>
-              <div className={styles.cardHeader}>
-                <p className={styles.cardTitle}>Simulaciones</p>
-              </div>
-              <p className={styles.housingSubheadline}>
-                Crear nueva simulación para {fullName}.
-              </p>
-              <div className="mt-4">
-                <button
-                  type="button"
-                  className={styles.buttonPrimary}
-                  onClick={() => {
-                    setActiveNav("projects");
-                  }}
-                >
-                  Nueva simulación
-                </button>
-              </div>
-            </div>
+                       <div className={styles.card}>
+                         <div className={styles.cardHeader}>
+                           <p className={styles.cardTitle}>Simulaciones</p>
+                         </div>
+                         <p className={styles.housingSubheadline}>
+                           Gestiona las simulaciones de crédito para {fullName}.
+                         </p>
+
+                         {storedSimulation ? (
+                           <div className={styles.miniSimulationSummary}>
+                             <p className={styles.miniSimulationTitle}>
+                               Última simulación guardada
+                             </p>
+                             <p className={styles.miniSimulationLine}>
+                               <strong>Banco:</strong> {storedSimulation.bank.name}
+                             </p>
+                             <p className={styles.miniSimulationLine}>
+                               <strong>Vivienda:</strong> {storedSimulation.property.name}
+                             </p>
+                             <p className={styles.miniSimulationLine}>
+                               <strong>Monto financiado:</strong>{" "}
+                               {formatPriceByCurrency(
+                                 storedSimulation.summary.amount,
+                                 storedSimulation.currency
+                               )}
+                             </p>
+                             <p className={styles.miniSimulationLine}>
+                               <strong>Cuota mensual:</strong>{" "}
+                               {formatPriceByCurrency(
+                                 storedSimulation.summary.monthlyPayment,
+                                 storedSimulation.currency
+                               )}
+                             </p>
+                           </div>
+                         ) : (
+                           <p className="mt-3 text-sm text-slate-500">
+                             Aún no hay simulaciones guardadas para este cliente.
+                           </p>
+                         )}
+
+                         <div className="mt-4 flex gap-3 flex-wrap">
+                           <button
+                             type="button"
+                             className={styles.buttonPrimary}
+                             onClick={startNewSimulation}
+                           >
+                             Nueva simulación
+                           </button>
+
+                           {storedSimulation && (
+                             <button
+                               type="button"
+                               className={styles.buttonSecondary}
+                               onClick={() => setActiveNav("reports")}
+                             >
+                               Ver reporte
+                             </button>
+                           )}
+                         </div>
+                       </div>
+
 
             <div className={styles.card}>
               <div className={styles.cardHeader}>
@@ -4204,7 +4398,16 @@ const getSimulationSummary = () => {
 
             {activeNav === "clients" ? renderClientsSection() : null}
             {activeNav === "projects" ? renderHousingSection() : null}
-            {activeNav === "reports" ? <LoanResultsDashboard /> : null}
+            {activeNav === "reports" ? (
+              <LoanResultsDashboard
+                client={activeClient}
+                simulationData={storedSimulation}
+                onNewSimulation={startNewSimulation}
+                onExportPdf={handleExportPdfClick}
+                onExportExcel={handleExportExcelClick}
+              />
+            ) : null}
+
             {activeNav === "support" ? renderSupportSection() : null}
           </div>
         </div>

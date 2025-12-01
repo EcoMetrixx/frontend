@@ -6,18 +6,8 @@
   <component name="ChangeListManager">
     <list default="true" id="ccd09c4c-46f8-46f3-9d96-a4d61b133e05" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/layout.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/layout.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/app/page.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/app/page.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/api/apiClient.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/api/apiClient.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/core/providers/AuthProvider.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/core/providers/AuthProvider.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/auth/components/CreateAccountModal.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/auth/components/CreateAccountModal.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/auth/components/LoginCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/auth/components/LoginCard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/auth/services/authApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/auth/services/authApi.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/clients/components/ClientRegistrationForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/clients/components/ClientRegistrationForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/clients/services/clientStorage.ts" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/dashboard/components/DashboardShell.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/dashboard/components/DashboardShell.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/reports/components/LoanResultsDashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/reports/components/LoanResultsDashboard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/styles/dashboard.module.css" beforeDir="false" afterPath="$PROJECT_DIR$/src/styles/dashboard.module.css" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
