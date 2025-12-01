@@ -1,78 +1,99 @@
+// src/core/providers/AuthProvider.tsx
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 import { ErrorHandler } from "../error-handling/ErrorHandler";
-import { InvalidCredentialsError } from "../errors";
+import {
+  loginRequest,
+  type AuthUserDto,
+} from "@/features/auth/services/authApi";
 
 const StorageKeys = {
-    USER: "auth:user",
+  USER: "auth:user",
+  TOKEN: "auth:token",
 } as const;
 
-const MOCK_USER = {
-    id: "advisor-001",
-    name: "Juan Torres",
-    email: "user@dwduqs.com",
-    role: "Asesor Hipotecario",
-};
-
-export type AuthUser = typeof MOCK_USER;
+export type AuthUser = AuthUserDto;
 
 interface AuthContextProps {
-    user: AuthUser | null;
-    login: (email: string, password: string) => Promise<void>;
-    logout: () => void;
+  user: AuthUser | null;
+  login: (email: string, password: string) => Promise<void>;
+  logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<AuthUser | null>(null);
+  const [user, setUser] = useState<AuthUser | null>(null);
 
-    const login = async (email: string, password: string) => {
-        try {
-            await new Promise((resolve) => setTimeout(resolve, 700));
+  const login = async (email: string, password: string) => {
+    try {
+      const normalizedEmail = email.trim().toLowerCase();
 
-            const normalizedEmail = email.trim().toLowerCase();
-            const isValidUser = normalizedEmail === MOCK_USER.email && password === "miVivienda#2024";
+      const result = await loginRequest(normalizedEmail, password);
 
-            if (!isValidUser) {
-                throw new InvalidCredentialsError();
-            }
+      const apiUser = result.user;
+      const accessToken = result.accessToken;
 
-            setUser(MOCK_USER);
-            localStorage.setItem(StorageKeys.USER, JSON.stringify(MOCK_USER));
-        } catch (error) {
-            ErrorHandler.handle(error);
-            throw error;
+      if (!apiUser) {
+        const error = new Error("Respuesta de login sin datos de usuario");
+        (error as any).code = "AUTH_MALFORMED_RESPONSE";
+        throw error;
+      }
+
+      setUser(apiUser);
+
+      try {
+        localStorage.setItem(StorageKeys.USER, JSON.stringify(apiUser));
+        if (accessToken) {
+          localStorage.setItem(StorageKeys.TOKEN, accessToken);
         }
-    };
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.warn("AuthProvider: failed to persist auth to localStorage", e);
+      }
+    } catch (error) {
+      ErrorHandler.handle(error);
+      throw error;
+    }
+  };
 
-    const logout = () => {
-        setUser(null);
-        localStorage.removeItem(StorageKeys.USER);
-    };
+  const logout = () => {
+    setUser(null);
+    localStorage.removeItem(StorageKeys.USER);
+    localStorage.removeItem(StorageKeys.TOKEN);
+  };
 
-    useEffect(() => {
-        try {
-            const storedUser = localStorage.getItem(StorageKeys.USER);
-            if (storedUser) {
-                setUser(JSON.parse(storedUser));
-            }
-        } catch {
-            localStorage.removeItem(StorageKeys.USER);
-        }
-    }, []);
+  useEffect(() => {
+    try {
+      const storedUser = localStorage.getItem(StorageKeys.USER);
+      if (storedUser) {
+        const parsed = JSON.parse(storedUser);
+        setUser(parsed);
+      }
+    } catch {
+      localStorage.removeItem(StorageKeys.USER);
+      localStorage.removeItem(StorageKeys.TOKEN);
+    }
+  }, []);
 
-
-    return (
-        <AuthContext.Provider value={{ user, login, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
+  return (
+    <AuthContext.Provider value={{ user, login, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export const useAuth = () => {
-    const context = useContext(AuthContext);
-    if (!context) throw new Error("useAuth debe usarse dentro de un AuthProvider");
-    return context;
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth debe usarse dentro de un AuthProvider");
+  }
+  return context;
 };

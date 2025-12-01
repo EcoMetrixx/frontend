@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useAuth } from "@/core/providers/AuthProvider";
 import { LoginCard } from "@/features/auth/components/LoginCard";
@@ -12,6 +12,12 @@ import styles from "@/styles/login.module.css";
 
 export default function HomePage() {
     const { user, logout } = useAuth();
+    useEffect(() => {
+        try {
+            // eslint-disable-next-line no-console
+            console.log("HomePage: auth user changed", user);
+        } catch { }
+    }, [user]);
     const [showRecoveryModal, setShowRecoveryModal] = useState(false);
     const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
 

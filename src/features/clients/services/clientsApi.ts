@@ -1,4 +1,5 @@
 // src/features/clients/services/clientsApi.ts
+
 export interface ClientDto {
   id: string;
   firstName: string;
@@ -37,27 +38,80 @@ export type CreateClientDto = Omit<ClientDto, "id" | "creditStatus">;
 export type UpdateClientDto = Partial<CreateClientDto>;
 
 const API_URL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:9000";
+  process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
 
-async function request<T>(url: string, options?: RequestInit): Promise<T> {
-  const response = await fetch(`${API_URL}${url}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...(options && options.headers),
-    },
+function findTokenInLocalStorage(): string | null {
+  if (typeof window === "undefined") return null;
+
+  for (let i = 0; i < window.localStorage.length; i += 1) {
+    const key = window.localStorage.key(i);
+    if (!key) continue;
+    const raw = window.localStorage.getItem(key);
+    if (!raw) continue;
+
+    if (raw.includes(".") && raw.split(".").length === 3) {
+      return raw;
+    }
+
+    try {
+      const parsed = JSON.parse(raw) as Record<string, unknown>;
+      const maybeToken =
+        typeof parsed.accessToken === "string"
+          ? parsed.accessToken
+          : typeof parsed.token === "string"
+          ? parsed.token
+          : typeof parsed.jwt === "string"
+          ? parsed.jwt
+          : null;
+
+      if (maybeToken) {
+        return maybeToken;
+      }
+    } catch {
+    }
+  }
+
+  return null;
+}
+
+function getAuthHeaders(): Record<string, string> {
+  const token = findTokenInLocalStorage();
+  if (!token) return {};
+  if (token.startsWith("Bearer ")) {
+    return { Authorization: token };
+  }
+  return { Authorization: `Bearer ${token}` };
+}
+
+async function request<T>(path: string, options?: RequestInit): Promise<T> {
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+    ...getAuthHeaders(),
+    ...(options && options.headers),
+  };
+
+  const response = await fetch(`${API_URL}${path}`, {
     ...options,
+    headers,
   });
 
   if (!response.ok) {
-    let message = "Error en la solicitud";
+    let body: any = null;
     try {
-      const body = await response.json();
-      if (body && body.message) {
-        message = body.message;
-      }
+      body = await response.json();
     } catch {}
+
+    try {
+      console.error("[clientsApi] error", response.status, body ?? {});
+    } catch {}
+
+    const message =
+      body && body.message
+        ? body.message
+        : `Cannot ${options?.method ?? "GET"} ${path}`;
     const error: any = new Error(message);
     error.status = response.status;
+    error.body = body;
     throw error;
   }
 
@@ -72,6 +126,7 @@ export async function getClients(
   filters: ClientFilters = {}
 ): Promise<ClientDto[]> {
   const params = new URLSearchParams();
+
   if (filters.bono) params.append("bonus", filters.bono);
   if (filters.banco) params.append("bank", filters.banco);
   if (filters.estadoCredito) params.append("creditStatus", filters.estadoCredito);
@@ -79,12 +134,11 @@ export async function getClients(
   if (filters.dni) params.append("dni", filters.dni);
 
   const query = params.toString();
-  const url = query ? `/clients?${query}` : "/clients";
-  return request<ClientDto>(url).then((r) => r as unknown as ClientDto[]);
-}
+  const path = query ? `/clients?${query}` : "/clients";
 
-export async function getClientById(id: string): Promise<ClientDto> {
-  return request<ClientDto>(`/clients/${id}`);
+  const data = await request<ClientDto[] | ClientDto>(path);
+  if (Array.isArray(data)) return data;
+  return [data];
 }
 
 export async function createClient(

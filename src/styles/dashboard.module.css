@@ -1269,3 +1269,27 @@
 .actionPurple:hover {
     background-color: #7e22ce;
 }
+
+.simulationAdvancedOptions {
+  margin-top: 6px;
+  background: #eef4ff;
+  border-radius: 12px;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: #111827;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  accent-color: #2563eb; /* azul bonito */
+}

@@ -1,8 +1,9 @@
 "use client";
 import { FormEvent, useState } from "react";
-import {AlertCircle,Eye,EyeOff,KeyRound,Lock,LogIn,Mail,UserPlus,} from "lucide-react";
+import { AlertCircle, Eye, EyeOff, KeyRound, Lock, LogIn, Mail, UserPlus, } from "lucide-react";
 import { useAuth } from "@/core/providers/AuthProvider";
 import styles from "@/styles/loginCard.module.css";
+import { useRouter } from "next/navigation";
 
 interface LoginCardProps {
     onForgotPassword: () => void;
@@ -11,8 +12,10 @@ interface LoginCardProps {
 
 export function LoginCard({ onForgotPassword, onCreateAccount }: LoginCardProps) {
     const { login } = useAuth();
-    const [email, setEmail] = useState("user@dwduqs.com");
-    const [password, setPassword] = useState("miVivienda#2024");
+    const router = useRouter();
+
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -25,6 +28,17 @@ export function LoginCard({ onForgotPassword, onCreateAccount }: LoginCardProps)
 
         try {
             await login(email, password);
+           // Debug: show stored user and token in console for troubleshooting
+           try {
+               // eslint-disable-next-line no-console
+               console.log("login successful, navigating to /");
+           } catch {}
+
+           // Navigate to root and refresh to ensure UI updates
+           router.replace("/");
+           try {
+               router.refresh();
+           } catch {}
         } catch {
             setError(
                 "Credenciales incorrectas. Intenta nuevamente o recupera tu contraseña."

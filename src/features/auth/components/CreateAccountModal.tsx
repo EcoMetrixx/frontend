@@ -54,7 +54,6 @@ function CreateAccountModalContent({ onRequestClose }: { onRequestClose: () => v
     }
 
     setIsSubmitting(true);
-
     try {
       await registerAdvisor({
         name: formData.name,
@@ -77,165 +76,249 @@ function CreateAccountModalContent({ onRequestClose }: { onRequestClose: () => v
     }
   };
 
+  const inputBase =
+    "w-full border-none bg-transparent text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400";
+
+  const inputWrapper =
+    "mt-1 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50/80 px-4 py-2.5 " +
+    "focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500";
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 px-4 backdrop-blur-sm">
-      <div className="w-full max-w-lg rounded-3xl bg-white p-8 shadow-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-start justify-between">
-          <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-indigo-600">
-              Crear nueva cuenta
-            </p>
-            <h2 className="mt-1 text-2xl font-semibold text-slate-900">Regístrate</h2>
-            <p className="mt-1 text-sm text-slate-500">
-              Completa el formulario para crear tu cuenta en Ecometrix.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={handleClose}
-            className="rounded-full p-2 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
-            aria-label="Cerrar modal"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 px-4 backdrop-blur-sm">
+      <div className="w-full max-w-2xl">
+        <div
+          className="
+            relative mx-auto flex max-h-[85vh] flex-col
+            rounded-[32px] bg-gradient-to-br from-slate-50 via-white to-slate-100
+            shadow-[0_18px_45px_rgba(15,23,42,0.35)]
+          "
+        >
+          {/* borde + shadow interno */}
+          <div className="pointer-events-none absolute inset-0 rounded-[32px] border border-white/70 shadow-inner shadow-slate-200/80" />
 
-        <form className="mt-6 space-y-5" onSubmit={handleSubmit}>
-          {/* Nombre */}
-          <div>
-            <label className="text-sm font-medium text-slate-600" htmlFor="name">
-              Nombre completo
-            </label>
-            <div className="mt-1 flex items-center gap-3 rounded-2xl border border-slate-200 px-5 py-4 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500">
-              <User className="h-4 w-4 text-slate-400" />
-              <input
-                id="name"
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full border-none bg-transparent text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400"
-                placeholder="Juan Pérez"
-                required
-              />
+          <div className="relative flex h-full flex-col">
+            {/* HEADER */}
+            <div className="relative border-b border-slate-100 px-8 pt-6 pb-4">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="absolute right-5 top-5 rounded-full p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                aria-label="Cerrar modal"
+              >
+                <X className="h-5 w-5" />
+              </button>
+
+              <div className="text-center">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-indigo-500">
+                  Crear nueva cuenta
+                </p>
+                <h2 className="mt-1 text-2xl font-semibold text-slate-900">Regístrate</h2>
+                <p className="mt-1 text-xs text-slate-500">
+                  Completa el formulario para crear tu cuenta en Ecometrix.
+                </p>
+              </div>
             </div>
-          </div>
 
-          {/* Email */}
-          <div>
-            <label className="text-sm font-medium text-slate-600" htmlFor="create-email">
-              Correo electrónico
-            </label>
-            <div className="mt-1 flex items-center gap-3 rounded-2xl border border-slate-200 px-5 py-4 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500">
-              <Mail className="h-4 w-4 text-slate-400" />
-              <input
-                id="create-email"
-                type="email"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full border-none bg-transparent text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400"
-                placeholder="usuario@empresa.com"
-                required
-              />
-            </div>
-          </div>
+            {/* BODY + FOOTER */}
+            <form
+              onSubmit={handleSubmit}
+              className="
+                flex flex-1 flex-col gap-6
+                overflow-y-auto px-8 pt-5 pb-7
+              "
+            >
+              {/* Datos personales */}
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-medium text-slate-600" htmlFor="name">
+                    Nombre completo
+                  </label>
+                  <div className={inputWrapper}>
+                    <User className="h-4 w-4 text-slate-400" />
+                    <input
+                      id="name"
+                      type="text"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
+                      className={inputBase}
+                      placeholder="Juan Pérez"
+                      required
+                    />
+                  </div>
+                </div>
 
-          {/* DNI */}
-          <div>
-            <label className="text-sm font-medium text-slate-600" htmlFor="dni">
-              DNI
-            </label>
-            <div className="mt-1 flex items-center gap-3 rounded-2xl border border-slate-200 px-5 py-4 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500">
-              <IdCard className="h-4 w-4 text-slate-400" />
-              <input
-                id="dni"
-                type="text"
-                value={formData.dni}
-                onChange={(e) => setFormData({ ...formData, dni: e.target.value })}
-                className="w-full border-none bg-transparent text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400"
-                placeholder="12345678"
-                required
-              />
-            </div>
-          </div>
+                <div>
+                  <label
+                    className="text-xs font-medium text-slate-600"
+                    htmlFor="create-email"
+                  >
+                    Correo electrónico
+                  </label>
+                  <div className={inputWrapper}>
+                    <Mail className="h-4 w-4 text-slate-400" />
+                    <input
+                      id="create-email"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({ ...formData, email: e.target.value })
+                      }
+                      className={inputBase}
+                      placeholder="usuario@empresa.com"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
 
-          {/* Teléfono */}
-          <div>
-            <label className="text-sm font-medium text-slate-600" htmlFor="phone">
-              Teléfono
-            </label>
-            <div className="mt-1 flex items-center gap-3 rounded-2xl border border-slate-200 px-5 py-4 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500">
-              <Phone className="h-4 w-4 text-slate-400" />
-              <input
-                id="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                className="w-full border-none bg-transparent text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400"
-                placeholder="+51987654321"
-                required
-              />
-            </div>
-          </div>
+              {/* DNI / Teléfono */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label className="text-xs font-medium text-slate-600" htmlFor="dni">
+                    DNI
+                  </label>
+                  <div className={inputWrapper}>
+                    <IdCard className="h-4 w-4 text-slate-400" />
+                    <input
+                      id="dni"
+                      type="text"
+                      value={formData.dni}
+                      onChange={(e) =>
+                        setFormData({ ...formData, dni: e.target.value })
+                      }
+                      className={inputBase}
+                      placeholder="12345678"
+                      required
+                    />
+                  </div>
+                </div>
 
-          {/* Password */}
-          <div>
-            <label className="text-sm font-medium text-slate-600" htmlFor="create-password">
-              Contraseña
-            </label>
-            <div className="mt-1 flex items-center gap-3 rounded-2xl border border-slate-200 px-5 py-4 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500">
-              <Lock className="h-4 w-4 text-slate-400" />
-              <input
-                id="create-password"
-                type="password"
-                value={formData.password}
-                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                className="w-full border-none bg-transparent text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400"
-                placeholder="Mínimo 6 caracteres"
-                required
-                minLength={6}
-              />
-            </div>
-          </div>
+                <div>
+                  <label
+                    className="text-xs font-medium text-slate-600"
+                    htmlFor="phone"
+                  >
+                    Teléfono
+                  </label>
+                  <div className={inputWrapper}>
+                    <Phone className="h-4 w-4 text-slate-400" />
+                    <input
+                      id="phone"
+                      type="tel"
+                      value={formData.phone}
+                      onChange={(e) =>
+                        setFormData({ ...formData, phone: e.target.value })
+                      }
+                      className={inputBase}
+                      placeholder="+51987654321"
+                      required
+                    />
+                  </div>
+                </div>
+              </div>
 
-          {/* Confirm password */}
-          <div>
-            <label className="text-sm font-medium text-slate-600" htmlFor="confirm-password">
-              Confirmar contraseña
-            </label>
-            <div className="mt-1 flex items-center gap-3 rounded-2xl border border-slate-200 px-5 py-4 focus-within:border-indigo-500 focus-within:ring-1 focus-within:ring-indigo-500">
-              <Lock className="h-4 w-4 text-slate-400" />
-              <input
-                id="confirm-password"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                className="w-full border-none bg-transparent text-sm font-medium text-slate-800 outline-none placeholder:text-slate-400"
-                placeholder="Confirma tu contraseña"
-                required
-                minLength={6}
-              />
-            </div>
-          </div>
+              {/* Contraseñas */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div>
+                  <label
+                    className="text-xs font-medium text-slate-600"
+                    htmlFor="create-password"
+                  >
+                    Contraseña
+                  </label>
+                  <div className={inputWrapper}>
+                    <Lock className="h-4 w-4 text-slate-400" />
+                    <input
+                      id="create-password"
+                      type="password"
+                      value={formData.password}
+                      onChange={(e) =>
+                        setFormData({ ...formData, password: e.target.value })
+                      }
+                      className={inputBase}
+                      placeholder="Mínimo 6 caracteres"
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                </div>
 
-          <div className="flex justify-end gap-3 pt-2">
+                <div>
+                  <label
+                    className="text-xs font-medium text-slate-600"
+                    htmlFor="confirm-password"
+                  >
+                    Confirmar contraseña
+                  </label>
+                  <div className={inputWrapper}>
+                    <Lock className="h-4 w-4 text-slate-400" />
+                    <input
+                      id="confirm-password"
+                      type="password"
+                      value={formData.confirmPassword}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          confirmPassword: e.target.value,
+                        })
+                      }
+                      className={inputBase}
+                      placeholder="Confirma tu contraseña"
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                </div>
+              </div>
+
+          {/* FOOTER */}
+          <div className="mt-4 flex justify-center border-t border-slate-100 pt-4">
+            {/* Botón verde CREAR CUENTA */}
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              style={{
+                backgroundColor: "#16a34a",   // verde
+                color: "#ffffff",
+                borderRadius: "9999px",
+                padding: "8px 22px",
+                fontSize: "0.875rem",
+                fontWeight: 600,
+                border: "none",
+                cursor: "pointer",
+                opacity: isSubmitting ? 0.6 : 1,
+              }}
+            >
+              Crear cuenta
+            </button>
+
+            {/* Botón CANCELAR texto negro */}
             <button
               type="button"
               onClick={handleClose}
-              className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+              style={{
+                backgroundColor: "transparent",
+                color: "#111827",            // negro/gris oscuro
+                borderRadius: "9999px",
+                padding: "8px 22px",
+                fontSize: "0.875rem",
+                fontWeight: 600,
+                border: "none",
+                cursor: "pointer",
+                marginLeft: "12px",
+              }}
             >
               Cancelar
             </button>
-            <button
-              type="submit"
-              className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:bg-indigo-700 disabled:opacity-60"
-              disabled={isSubmitting}
-            >
-              <UserPlus className="h-4 w-4" />
-              {isSubmitting ? "Creando..." : "Crear cuenta"}
-            </button>
           </div>
-        </form>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+
+
