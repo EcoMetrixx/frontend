@@ -544,6 +544,10 @@ function getAvailabilityVariant(status?: string): "blue" | "orange" | "grey" {
 }
 // ==== STORAGE DE SIMULACIONES POR CLIENTE (LOCALSTORAGE) ==== //
 
+// ==== STORAGE DE SIMULACIONES POR CLIENTE (LOCALSTORAGE) ==== //
+
+// ==== STORAGE DE SIMULACIONES POR CLIENTE (LOCALSTORAGE) ==== //
+
 export interface StoredSimulationData {
   clientId: string;
   simulationId?: string | null;
@@ -568,9 +572,18 @@ export interface StoredSimulationData {
     id?: string | null;
     name: string;
   };
+  // Meta para Transparencia SBS
+  financing?: {
+    interestRateAnnual?: number;     // TEA del banco usada en la simulación
+    adminFeesPercent?: number;       // Comisión administrativa %
+    evaluationFeePercent?: number;   // Comisión de evaluación %
+    lifeInsurancePercent?: number;   // Seguro de desgravamen %
+    gracePeriodMonths?: number;      // Meses de gracia
+  };
 }
 
 const SIMULATION_STORAGE_KEY = "ecometrix_client_simulations_v1";
+
 
 function readStoredSimulations(): StoredSimulationData[] {
   if (typeof window === "undefined") return [];
@@ -945,14 +958,24 @@ const [simulationAdvanced, setSimulationAdvanced] = useState<{
 const [storedSimulation, setStoredSimulation] =
   useState<StoredSimulationData | null>(null);
 
-  useEffect(() => {
-    if (!activeClient) {
-      setStoredSimulation(null);
-      return;
-    }
-    const stored = getStoredSimulationForClient(activeClient.id);
-    setStoredSimulation(stored);
-  }, [activeClient]);
+useEffect(() => {
+  if (!activeClient) {
+    setStoredSimulation(null);
+    setSavedSimulationId(null);
+    return;
+  }
+
+  const stored = getStoredSimulationForClient(activeClient.id);
+  setStoredSimulation(stored);
+
+  // Si hay simulación guardada para este cliente, usamos su id
+  if (stored?.simulationId) {
+    setSavedSimulationId(stored.simulationId);
+  } else {
+    setSavedSimulationId(null);
+  }
+}, [activeClient]);
+
 
 
   const [calculationSummary, setCalculationSummary] = useState<{
@@ -1759,79 +1782,85 @@ const handleCalculateSimulation = async () => {
   }
 };
 
+const handleSaveSimulation = async () => {
+  const calcPayload = buildCalculationPayload();
+  if (!calcPayload) return;
 
+  const createPayload = buildCreateSimulationPayload(calcPayload);
+  if (!createPayload) return;
 
-  const handleSaveSimulation = async () => {
-    const calcPayload = buildCalculationPayload();
-    if (!calcPayload) return;
+  try {
+    setSimulationLoading(true);
+    setSimulationError(null);
 
-    const createPayload = buildCreateSimulationPayload(calcPayload);
-    if (!createPayload) return;
+    const saved = await createSimulation(createPayload);
+    setCurrentSimulation(saved);
+    setSavedSimulationId(saved.id ?? null);
 
-    try {
-      setSimulationLoading(true);
-      setSimulationError(null);
+    const normalized = normalizeCalculation(saved as any, calcPayload);
 
-      const saved = await createSimulation(createPayload);
-      setCurrentSimulation(saved);
-      setSavedSimulationId(saved.id ?? null);
+    const summary = {
+      amount: normalized.amount ?? calcPayload.amount,
+      termYears: normalized.termYears ?? calcPayload.term,
+      monthlyPayment:
+        normalized.monthlyPayment ??
+        calculationSummary?.monthlyPayment ??
+        null,
+      totalInterests: normalized.totalInterests,
+      totalPayable: normalized.totalPayable,
+      tcea: normalized.tcea,
+      van: normalized.van,
+      tir: normalized.tir,
+    };
 
-      const normalized = normalizeCalculation(saved as any, calcPayload);
+    setCalculationSummary(summary);
 
-      const summary = {
-        amount: normalized.amount ?? calcPayload.amount,
-        termYears: normalized.termYears ?? calcPayload.term,
-        monthlyPayment:
-          normalized.monthlyPayment ??
-          calculationSummary?.monthlyPayment ??
-          null,
-        totalInterests: normalized.totalInterests,
-        totalPayable: normalized.totalPayable,
-        tcea: normalized.tcea,
-        van: normalized.van,
-        tir: normalized.tir,
+    // 👇 Guardamos en localStorage por cliente
+    if (activeClient && selectedProperty && selectedBank) {
+      const scheduleFromServer =
+        (saved as any)?.result?.schedule ??
+        (currentSimulation as any)?.result?.schedule ??
+        [];
+
+      const toStore: StoredSimulationData = {
+        clientId: activeClient.id,
+        simulationId: saved.id ?? null,
+        createdAt: new Date().toISOString(),
+        currency: simulationAdvanced.currency,
+        summary,
+        schedule: scheduleFromServer,
+        property: {
+          id: selectedProperty.id,
+          name: selectedProperty.name,
+        },
+        bank: {
+          id: selectedBank.id ?? "",
+          name: selectedBank.name,
+        },
+        // ✅ Meta usada en la sección de Transparencia SBS
+        financing: {
+          interestRateAnnual: calcPayload.interestRate,
+          adminFeesPercent: calcPayload.adminFees,
+          evaluationFeePercent: calcPayload.evaluationFee,
+          lifeInsurancePercent: calcPayload.lifeInsurance,
+          gracePeriodMonths: calcPayload.gracePeriod,
+        },
       };
 
-      setCalculationSummary(summary);
-
-      // 👇 Guardamos en localStorage por cliente
-      if (activeClient && selectedProperty && selectedBank) {
-        const scheduleFromServer =
-          (saved as any)?.result?.schedule ??
-          (currentSimulation as any)?.result?.schedule ??
-          [];
-
-        const toStore: StoredSimulationData = {
-          clientId: activeClient.id,
-          simulationId: saved.id ?? null,
-          createdAt: new Date().toISOString(),
-          currency: simulationAdvanced.currency,
-          summary,
-          schedule: scheduleFromServer,
-          property: {
-            id: selectedProperty.id,
-            name: selectedProperty.name,
-          },
-          bank: {
-            id: selectedBank.id ?? "",
-            name: selectedBank.name,
-          },
-        };
-
-        upsertStoredSimulation(toStore);
-        setStoredSimulation(toStore);
-      }
-
-      alert("Simulación guardada correctamente.");
-    } catch (err: any) {
-      console.error("Error guardando simulación", err);
-      setSimulationError(
-        err?.message || "No se pudo guardar la simulación. Intenta nuevamente."
-      );
-    } finally {
-      setSimulationLoading(false);
+      upsertStoredSimulation(toStore);
+      setStoredSimulation(toStore);
     }
-  };
+
+    alert("Simulación guardada correctamente.");
+  } catch (err: any) {
+    console.error("Error guardando simulación", err);
+    setSimulationError(
+      err?.message || "No se pudo guardar la simulación. Intenta nuevamente."
+    );
+  } finally {
+    setSimulationLoading(false);
+  }
+};
 
 
   const handleExportPdfClick = async () => {
@@ -1866,21 +1895,22 @@ const handleCalculateSimulation = async () => {
     loadClients();
   }, []);
 
-  useEffect(() => {
-    if (activeNav !== "clients") {
-      setShowRegistrationForm(false);
-      setEditingClient(null);
-      setEditClientValues({});
-    }
-    if (activeNav !== "projects") {
-      setSelectedProperty(null);
-      setSelectedBank(null);
-      setCurrentSimulation(null);
-      setSavedSimulationId(null);
-      setSimulationInputs({});
-      setCalculationSummary(null);
-    }
-  }, [activeNav]);
+useEffect(() => {
+  if (activeNav !== "clients") {
+    setShowRegistrationForm(false);
+    setEditingClient(null);
+    setEditClientValues({});
+  }
+  if (activeNav !== "projects") {
+    setSelectedProperty(null);
+    setSelectedBank(null);
+    setCurrentSimulation(null);
+    setSimulationInputs({});
+    setCalculationSummary(null);
+    // OJO: NO limpiamos savedSimulationId aquí para poder exportar
+  }
+}, [activeNav]);
+
 
   useEffect(() => {
     if (activeNav === "projects") {
@@ -2771,15 +2801,20 @@ const getSimulationSummary = () => {
                              Nueva simulación
                            </button>
 
-                           {storedSimulation && (
-                             <button
-                               type="button"
-                               className={styles.buttonSecondary}
-                               onClick={() => setActiveNav("reports")}
-                             >
-                               Ver reporte
-                             </button>
-                           )}
+{storedSimulation && (
+  <button
+    type="button"
+    className={styles.buttonSecondary}
+    onClick={() => {
+      if (storedSimulation.simulationId) {
+        setSavedSimulationId(storedSimulation.simulationId);
+      }
+      setActiveNav("reports");
+    }}
+  >
+    Ver reporte
+  </button>
+)}
                          </div>
                        </div>
 

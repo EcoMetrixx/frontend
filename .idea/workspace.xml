@@ -6,9 +6,10 @@
   <component name="ChangeListManager">
     <list default="true" id="ccd09c4c-46f8-46f3-9d96-a4d61b133e05" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/clients/components/ClientRegistrationForm.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/clients/components/ClientRegistrationForm.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/features/clients/services/clientsApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/clients/services/clientsApi.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/clients/components/ClientRegistrationForm.tsx" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/src/features/dashboard/components/DashboardShell.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/dashboard/components/DashboardShell.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/reports/components/LoanResultsDashboard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/src/features/reports/components/LoanResultsDashboard.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/features/simulations/services/simulationsApi.ts" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
