@@ -34,54 +34,118 @@ export interface ClientFilters {
   dni?: string;
 }
 
+// El backend se encarga de creditStatus, aquí no se envía
 export type CreateClientDto = Omit<ClientDto, "id" | "creditStatus">;
 export type UpdateClientDto = Partial<CreateClientDto>;
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
 
-function findTokenInLocalStorage(): string | null {
-  if (typeof window === "undefined") return null;
+// =======================
+//  DETECCIÓN DEL TOKEN
+// =======================
 
-  for (let i = 0; i < window.localStorage.length; i += 1) {
-    const key = window.localStorage.key(i);
+const JWT_REGEX = /^[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+$/;
+
+/**
+ * Intenta extraer un JWT de un storage dado (localStorage o sessionStorage)
+ */
+function findTokenInStorage(
+  storage: Storage | null | undefined
+): string | null {
+  if (!storage) return null;
+
+  for (let i = 0; i < storage.length; i += 1) {
+    const key = storage.key(i);
     if (!key) continue;
-    const raw = window.localStorage.getItem(key);
+
+    const raw = storage.getItem(key);
     if (!raw) continue;
 
-    if (raw.includes(".") && raw.split(".").length === 3) {
+    // Caso 1: el valor ES directamente un JWT válido
+    if (JWT_REGEX.test(raw)) {
       return raw;
     }
 
+    // Caso 2: intentamos parsear como JSON
     try {
-      const parsed = JSON.parse(raw) as Record<string, unknown>;
-      const maybeToken =
-        typeof parsed.accessToken === "string"
-          ? parsed.accessToken
-          : typeof parsed.token === "string"
-          ? parsed.token
-          : typeof parsed.jwt === "string"
-          ? parsed.jwt
-          : null;
+      const parsed = JSON.parse(raw);
 
-      if (maybeToken) {
-        return maybeToken;
+      // 2a) El JSON es directamente un string con el JWT
+      if (typeof parsed === "string" && JWT_REGEX.test(parsed)) {
+        return parsed;
+      }
+
+      // 2b) El JSON es un objeto con posibles campos de token
+      if (parsed && typeof parsed === "object") {
+        const obj = parsed as Record<string, unknown>;
+
+        const candidates: (string | undefined)[] = [
+          typeof obj.accessToken === "string" ? obj.accessToken : undefined,
+          typeof (obj as any).access_token === "string"
+            ? (obj as any).access_token
+            : undefined,
+          typeof obj.token === "string" ? obj.token : undefined,
+          typeof obj.jwt === "string" ? obj.jwt : undefined,
+        ];
+
+        for (const c of candidates) {
+          if (c && JWT_REGEX.test(c)) {
+            return c;
+          }
+        }
+
+        // 2c) Buscar en cualquier valor string dentro del objeto
+        for (const value of Object.values(obj)) {
+          if (typeof value === "string" && JWT_REGEX.test(value)) {
+            return value;
+          }
+        }
       }
     } catch {
+      // no era JSON, lo ignoramos
     }
   }
 
   return null;
 }
 
+/**
+ * Busca un JWT en localStorage y sessionStorage.
+ * Soporta varios formatos:
+ * - Valor directo:   storage.setItem("token", "<jwt>")
+ * - JSON string:     storage.setItem("token", JSON.stringify("<jwt>"))
+ * - Objeto:          { accessToken | access_token | token | jwt }
+ */
+function findToken(): string | null {
+  if (typeof window === "undefined") return null;
+
+  // Primero localStorage, luego sessionStorage
+  return (
+    findTokenInStorage(window.localStorage) ??
+    findTokenInStorage(window.sessionStorage)
+  );
+}
+
 function getAuthHeaders(): Record<string, string> {
-  const token = findTokenInLocalStorage();
-  if (!token) return {};
+  const token = findToken();
+
+  if (!token) {
+    // Si aquí no hay token, todas las llamadas protegidas caerán en 401
+    return {};
+  }
+
+  // Si ya viene con "Bearer " lo respetamos
   if (token.startsWith("Bearer ")) {
     return { Authorization: token };
   }
+
   return { Authorization: `Bearer ${token}` };
 }
+
+// =======================
+//  REQUEST GENÉRICO
+// =======================
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
   const headers: HeadersInit = {
@@ -99,16 +163,21 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     let body: any = null;
     try {
       body = await response.json();
-    } catch {}
+    } catch {
+      // body no es JSON
+    }
 
     try {
       console.error("[clientsApi] error", response.status, body ?? {});
-    } catch {}
+    } catch {
+      // no pasa nada si el console.error falla
+    }
 
     const message =
       body && body.message
         ? body.message
         : `Cannot ${options?.method ?? "GET"} ${path}`;
+
     const error: any = new Error(message);
     error.status = response.status;
     error.body = body;
@@ -122,6 +191,10 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   return (await response.json()) as T;
 }
 
+// =======================
+//  MÉTODOS PÚBLICOS
+// =======================
+
 export async function getClients(
   filters: ClientFilters = {}
 ): Promise<ClientDto[]> {
@@ -129,7 +202,8 @@ export async function getClients(
 
   if (filters.bono) params.append("bonus", filters.bono);
   if (filters.banco) params.append("bank", filters.banco);
-  if (filters.estadoCredito) params.append("creditStatus", filters.estadoCredito);
+  if (filters.estadoCredito)
+    params.append("creditStatus", filters.estadoCredito);
   if (filters.asesor) params.append("advisor", filters.asesor);
   if (filters.dni) params.append("dni", filters.dni);
 

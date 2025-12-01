@@ -105,6 +105,73 @@ const BONUS_OPTIONS = [
   { key: "TECHO_PROPIO", label: "Bono Techo Propio", percent: 8 },
 ];
 
+type CreditStatusKey = "EN_PROCESO" | "APTO" | "NO_APTO";
+
+const CREDIT_STATUS_OPTIONS: { key: CreditStatusKey; label: string }[] = [
+  { key: "EN_PROCESO", label: "En proceso" },
+  { key: "APTO", label: "Aprobado" },
+  { key: "NO_APTO", label: "Rechazado" },
+];
+
+function mapCreditStatusToKey(status?: string | null): CreditStatusKey {
+  if (!status) return "EN_PROCESO";
+  const s = status.toLowerCase();
+  if (s.includes("no apto")) return "NO_APTO";
+  if (s.includes("apto")) return "APTO";
+  return "EN_PROCESO";
+}
+
+function mapKeyToCreditStatusLabel(key: CreditStatusKey): string {
+  switch (key) {
+    case "APTO":
+      // Importante: dejamos el texto con "Apto" para que tus filtros sigan funcionando
+      return "Apto a bono";
+    case "NO_APTO":
+      return "No apto a bono";
+    case "EN_PROCESO":
+    default:
+      return "En proceso de evaluación de bono";
+  }
+}
+
+// Evaluación simple del bono según ingresos / ahorros / deudas / primera vivienda
+function computeBonusEligibility(client: ClientDto): string {
+  const income = client.familyIncome ?? 0;
+  const savings = client.savings ?? 0;
+  const debts = client.debts ?? 0;
+  const firstHome = !!client.firstHome;
+
+  // Si no tiene ningún bono seleccionado, no se evalúa elegibilidad
+  const hasBonus =
+    !!client.bonus &&
+    client.bonus.toLowerCase() !== "sin bono" &&
+    client.bonus.toLowerCase() !== "ninguno";
+
+  if (!hasBonus) {
+    // No hay bono, por lo tanto no se considera elegible
+    return "Sin bono aplicado";
+  }
+
+  const debtRatio = income > 0 ? debts / income : 1;
+
+  // 🔹 REGLA DE ELEGIBILIDAD:
+  // - Ingreso >= 1500
+  // - Ahorros >= 3000
+  // - Deuda / Ingreso <= 40%
+  // - Primera vivienda = true
+  //
+  // Si cumple todo => el cliente es ELEGIBLE al bono
+  if (income >= 1500 && savings >= 3000 && debtRatio <= 0.4 && firstHome) {
+    // Importante: mantenemos la palabra "Apto" para que funcionen los filtros
+    return "Apto a bono"; // Cliente elegible al bono
+  }
+
+  // En cualquier otro caso lo consideramos NO ELEGIBLE
+  return "No apto a bono"; // Cliente no elegible al bono
+}
+
+
+
 const filterFields = [
   { label: "Bono", placeholder: "Todos los bonos", name: "bono" as const },
   { label: "Banco", placeholder: "Todos los bancos", name: "banco" as const },
@@ -904,28 +971,31 @@ const [storedSimulation, setStoredSimulation] =
   );
   const [selectedBonusKey, setSelectedBonusKey] = useState<string>("SIN_BONO");
 
-  useEffect(() => {
-    if (activeClient) {
-      if (baseDownPayment === undefined) {
-        setBaseDownPayment(activeClient.savings ?? 0);
-      }
-
-      if (activeClient.bonus) {
-        const found = BONUS_OPTIONS.find((b) =>
-          activeClient.bonus!.toLowerCase().includes(
-            b.label.toLowerCase().split(" - ")[0] // parte “Bono Buen Pagador”
-          )
-        );
-        if (found) {
-          setSelectedBonusKey(found.key);
-        }
-      }
-    } else {
-      setBaseDownPayment(undefined);
-      setSelectedBonusKey("SIN_BONO");
+useEffect(() => {
+  if (activeClient) {
+    if (baseDownPayment === undefined) {
+      setBaseDownPayment(activeClient.savings ?? 0);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeClient]);
+
+    if (activeClient.bonus) {
+      const cleanedBonus = activeClient.bonus.trim().toLowerCase();
+
+      const found = BONUS_OPTIONS.find((b) =>
+        b.label.trim().toLowerCase() === cleanedBonus
+      );
+
+      if (found) {
+        setSelectedBonusKey(found.key);
+      }
+    }
+  } else {
+    setBaseDownPayment(undefined);
+    setSelectedBonusKey("SIN_BONO");
+  }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [activeClient]);
+
+
 
 
 
@@ -1006,7 +1076,29 @@ const [storedSimulation, setStoredSimulation] =
       setClientsLoading(true);
       setClientsError(null);
 
-      await createClient(payload);
+      const created = await createClient(payload);
+
+      // Si la API devuelve el cliente creado, evaluamos automáticamente el bono
+      if (created && (created as any).id) {
+        const clientCreated = created as ClientDto;
+        const evaluatedStatus = computeBonusEligibility(clientCreated);
+
+        try {
+          await updateClient(clientCreated.id, {
+            creditStatus: evaluatedStatus,
+          });
+
+          alert(
+            `Cliente registrado. Resultado inicial para el bono: ${evaluatedStatus}.`
+          );
+        } catch (err) {
+          console.error(
+            "Error actualizando estado de crédito tras registro",
+            err
+          );
+        }
+      }
+
       await loadClients();
       setShowRegistrationForm(false);
     } catch (err: any) {
@@ -1273,6 +1365,58 @@ const [storedSimulation, setStoredSimulation] =
       setEditingLoading(false);
     }
   };
+
+  const handleChangeBonus = async (newBonusKey: string) => {
+    setSelectedBonusKey(newBonusKey);
+
+    if (!activeClient) return;
+
+    const selected = BONUS_OPTIONS.find((b) => b.key === newBonusKey);
+    if (!selected) return;
+
+    const newBonusLabel = selected.label;
+
+    // Calculamos el nuevo estado de crédito según el bono elegido
+    const newCreditStatus = computeBonusEligibility({
+      ...activeClient,
+      bonus: newBonusLabel,
+    });
+
+    try {
+      const updated = await updateClient(activeClient.id, {
+        bonus: newBonusLabel,
+        creditStatus: newCreditStatus,
+      });
+
+      setActiveClient(updated);
+      setClients((prev) =>
+        prev.map((c) => (c.id === updated.id ? updated : c))
+      );
+    } catch (err) {
+      console.error("Error actualizando bono del cliente", err);
+      // Dejamos al menos el bono activo en la simulación aunque falle la API
+    }
+  };
+  const handleChangeCreditStatus = async (statusKey: CreditStatusKey) => {
+    if (!activeClient) return;
+
+    const newLabel = mapKeyToCreditStatusLabel(statusKey);
+
+    try {
+      const updated = await updateClient(activeClient.id, {
+        creditStatus: newLabel,
+      });
+
+      setActiveClient(updated);
+      setClients((prev) =>
+        prev.map((c) => (c.id === updated.id ? updated : c))
+      );
+    } catch (err) {
+      console.error("Error actualizando estado de crédito", err);
+      alert("No se pudo actualizar el estado del crédito. Intenta nuevamente.");
+    }
+  };
+
 
   const resetSimulationState = () => {
     setSelectedProperty(null);
@@ -1966,8 +2110,8 @@ const getSimulationSummary = () => {
                                    selectedBonus.percent === 0
                                      ? "Cliente sin bono aplicado"
                                      : isNoApto
-                                     ? "Cliente no califica para este bono"
-                                     : "Cliente califica para este bono";
+                                     ? "Cliente no elegible para este bono"
+                                     : "Cliente elegible para este bono";
 
                                  return (
                                    <>
@@ -2022,9 +2166,7 @@ const getSimulationSummary = () => {
                                        <select
                                          className={styles.filterSelect}
                                          value={selectedBonusKey}
-                                         onChange={(e) =>
-                                           setSelectedBonusKey(e.target.value)
-                                         }
+                                         onChange={(e) => handleChangeBonus(e.target.value)}
                                        >
                                          {BONUS_OPTIONS.map((opt) => (
                                            <option key={opt.key} value={opt.key}>
@@ -2455,6 +2597,8 @@ const getSimulationSummary = () => {
     if (!activeClient) return null;
 
     const fullName = `${activeClient.firstName} ${activeClient.lastName}`;
+    const creditStatusKey = mapCreditStatusToKey(activeClient.creditStatus);
+
 
     return (
       <section className={styles.card}>
@@ -2527,11 +2671,22 @@ const getSimulationSummary = () => {
             </p>
           </div>
           <div>
-            <p className={styles.clientInfoLabel}>Resultado de elegibilidad</p>
-            <p className={styles.clientInfoValue}>
-              {activeClient.creditStatus ?? "Sin evaluación de bono"}
-            </p>
+            <p className={styles.clientInfoLabel}>Estado del crédito / bono</p>
+            <select
+              className={styles.filterSelect}
+              value={creditStatusKey}
+              onChange={(e) =>
+                handleChangeCreditStatus(e.target.value as CreditStatusKey)
+              }
+            >
+              {CREDIT_STATUS_OPTIONS.map((opt) => (
+                <option key={opt.key} value={opt.key}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
           </div>
+
         </div>
       </section>
     );
@@ -3692,12 +3847,24 @@ const getSimulationSummary = () => {
                 ? `${activeClient.firstName} ${activeClient.lastName}`
                 : "Ninguno seleccionado"}
             </p>
-            <p className={styles.housingSubheadline}>
-              Bono activo:{" "}
-              <span className={styles.housingBadgeHighlight}>
-                {activeClient?.bonus ?? "Sin bono"}
-              </span>
-            </p>
+<p className={styles.housingSubheadline}>
+  Bono activo:{" "}
+  <span className={styles.housingBadgeHighlight}>
+    {(() => {
+      if (!activeClient) return "Sin bono";
+
+      // 1) intentamos usar el bono seleccionado en la simulación
+      const opt = BONUS_OPTIONS.find((b) => b.key === selectedBonusKey);
+      if (opt && opt.key !== "SIN_BONO") {
+        return opt.label;
+      }
+
+      // 2) si no hay bono seleccionado, usamos el que viene del cliente
+      return activeClient.bonus ?? "Sin bono";
+    })()}
+  </span>
+</p>
+
           </div>
           <div className={styles.housingSummary}>
             <div>

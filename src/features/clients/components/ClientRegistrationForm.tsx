@@ -42,6 +42,7 @@ export interface ClientRegistrationFormData {
 }
 
 type EvaluationStatus = "idle" | "running" | "completed";
+type EligibilityState = "unknown" | "eligible" | "notEligible";
 
 const steps = [
   { id: 1, label: "Datos Personales" },
@@ -119,6 +120,27 @@ export function ClientRegistrationForm({
     }),
     [data]
   );
+
+  // ======== Cálculo de elegibilidad (simple / referencial) ========
+
+  const numericIncome = Number(data.financiera.familyIncome || 0);
+  const numericDebts = Number(data.financiera.debts || 0);
+  const isFirstHome = data.financiera.firstHome;
+
+  const eligibility = useMemo<EligibilityState>(() => {
+    if (!numericIncome) return "unknown";
+
+    const incomeInRange = numericIncome >= 1200 && numericIncome <= 5000;
+    const debtOk = numericDebts <= numericIncome * 0.4;
+
+    if (incomeInRange && debtOk && isFirstHome) {
+      return "eligible";
+    }
+
+    return "notEligible";
+  }, [numericIncome, numericDebts, isFirstHome]);
+
+  const isEligible = eligibility === "eligible";
 
   const handleChange = <K extends keyof ClientRegistrationFormData>(
     section: K,
@@ -343,34 +365,53 @@ export function ClientRegistrationForm({
         </div>
 
         <div className={styles.formCard}>
+          {/* ========== PANEL FINAL (DESPUÉS DE GUARDAR) ========== */}
           {showFinalSuccess && (
             <div className="space-y-6">
-              <div className="rounded-3xl border border-emerald-200 bg-emerald-50/80 p-6">
-                <div className="flex items-center gap-3 text-emerald-700">
-                  <CheckCircle2 className="h-6 w-6" />
+              <div
+                className={`rounded-3xl border p-6 ${
+                  isEligible
+                    ? "border-emerald-200 bg-emerald-50/80"
+                    : "border-amber-200 bg-amber-50/80"
+                }`}
+              >
+                <div className="flex items-center gap-3 text-slate-800">
+                  <CheckCircle2 className="h-6 w-6 text-emerald-600" />
                   <div>
                     <p className="text-xl font-semibold">
-                      ¡Cliente elegible y registro completado!
+                      {isEligible
+                        ? "Registro completado y cliente elegible"
+                        : "Registro completado"}
                     </p>
-                    <p className="text-sm text-emerald-800">
-                      Se generó el expediente con todos los datos listo para
-                      aplicar a los bonos estatales.
+                    <p className="text-sm text-slate-700">
+                      {isEligible
+                        ? "Se generó el expediente con todos los datos listo para aplicar a los bonos estatales."
+                        : "Se generó el expediente del cliente para seguimiento y futuras evaluaciones de crédito."}
                     </p>
                   </div>
                 </div>
-                <ul className="mt-4 space-y-2 rounded-2xl bg-white p-4 text-sm text-slate-600">
-                  {[
-                    "Aplica para Bono del Buen Pagador (MiVivienda)",
-                    "Aplica para Bono Familiar Habitacional (Techo Propio)",
-                  ].map((benefit) => (
-                    <li key={benefit} className="flex items-center gap-2">
-                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-                        <Check className="h-4 w-4" />
-                      </span>
-                      {benefit}
-                    </li>
-                  ))}
-                </ul>
+
+                {isEligible ? (
+                  <ul className="mt-4 space-y-2 rounded-2xl bg-white p-4 text-sm text-slate-600">
+                    {[
+                      "Aplica para Bono del Buen Pagador (MiVivienda)",
+                      "Aplica para Bono Familiar Habitacional (Techo Propio)",
+                    ].map((benefit) => (
+                      <li key={benefit} className="flex items-center gap-2">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
+                          <Check className="h-4 w-4" />
+                        </span>
+                        {benefit}
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <div className="mt-4 rounded-2xl bg-white p-4 text-sm text-slate-600">
+                    Actualmente el cliente no cumple los criterios
+                    referenciales para bonos estatales, pero su información
+                    quedó registrada para futuras oportunidades.
+                  </div>
+                )}
               </div>
 
               <div className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
@@ -415,6 +456,7 @@ export function ClientRegistrationForm({
             </div>
           )}
 
+          {/* ========== PASO 1: DATOS PERSONALES ========== */}
           {!showFinalSuccess && currentStep === 0 && (
             <>
               <div className={styles.sectionHeader}>
@@ -561,6 +603,7 @@ export function ClientRegistrationForm({
             </>
           )}
 
+          {/* ========== PASO 2: LABORAL ========== */}
           {!showFinalSuccess && currentStep === 1 && (
             <>
               <div className={styles.sectionHeader}>
@@ -674,6 +717,7 @@ export function ClientRegistrationForm({
             </>
           )}
 
+          {/* ========== PASO 3: FINANCIERA ========== */}
           {!showFinalSuccess && currentStep === 2 && (
             <>
               <div className={styles.sectionHeader}>
@@ -770,9 +814,7 @@ export function ClientRegistrationForm({
                   <label className={styles.formLabel}>
                     Información Adicional
                   </label>
-                  <p className="text-xs text-slate-500 mb-2">
-                    Observaciones
-                  </p>
+                  <p className="text-xs text-slate-500 mb-2">Observaciones</p>
                   <textarea
                     className={styles.formInput}
                     rows={4}
@@ -787,6 +829,7 @@ export function ClientRegistrationForm({
             </>
           )}
 
+          {/* ========== PASO 4: EVALUACIÓN ========== */}
           {!showFinalSuccess && currentStep === 3 && (
             <>
               <div className={styles.sectionHeader}>
@@ -794,7 +837,7 @@ export function ClientRegistrationForm({
                   Evaluación de Elegibilidad
                 </h2>
                 <p className={styles.sectionSubtitle}>
-                  Resultado de la evaluación para bonos estatales
+                  Resultado preliminar según los datos del cliente
                 </p>
               </div>
               {evaluationStatus !== "completed" ? (
@@ -806,31 +849,88 @@ export function ClientRegistrationForm({
                 </div>
               ) : (
                 <div className="space-y-5">
-                  <div className="rounded-xl border-2 border-emerald-200 bg-emerald-50 p-6">
-                    <div className="flex items-center gap-3 text-emerald-700 mb-4">
-                      <CheckCircle2 className="h-6 w-6" />
-                      <p className="text-lg font-semibold">
-                        ¡Cliente Elegible!
-                      </p>
+                  <div
+                    className={`rounded-xl border-2 p-6 ${
+                      isEligible
+                        ? "border-emerald-200 bg-emerald-50"
+                        : "border-rose-200 bg-rose-50"
+                    }`}
+                  >
+                    <div
+                      className={`mb-4 flex items-start gap-3 ${
+                        isEligible ? "text-emerald-700" : "text-rose-700"
+                      }`}
+                    >
+                      {isEligible ? (
+                        <CheckCircle2 className="h-6 w-6" />
+                      ) : (
+                        <X className="h-6 w-6" />
+                      )}
+                      <div>
+                        <p className="text-lg font-semibold">
+                          {isEligible
+                            ? "¡Cliente elegible para bonos estatales!"
+                            : "Cliente no elegible para bonos estatales"}
+                        </p>
+                        <p className="text-sm opacity-90">
+                          {isEligible
+                            ? "Con la información ingresada, el cliente podría acceder a los siguientes beneficios estatales:"
+                            : "Con la información ingresada, el cliente actualmente no cumple los criterios referenciales para bonos estatales."}
+                        </p>
+                      </div>
                     </div>
-                    <ul className="space-y-2">
-                      <li className="flex items-center gap-2 text-sm text-emerald-800">
-                        <Check className="h-4 w-4" />
-                        Aplica para Bono del Buen Pagador (MiVivienda)
-                      </li>
-                      <li className="flex items-center gap-2 text-sm text-emerald-800">
-                        <Check className="h-4 w-4" />
-                        Aplica para Bono Familiar Habitacional (Techo Propio)
-                      </li>
-                    </ul>
+
+                    {isEligible ? (
+                      <ul className="space-y-2">
+                        <li className="flex items-center gap-2 text-sm text-emerald-800">
+                          <Check className="h-4 w-4" />
+                          Aplica para Bono del Buen Pagador (MiVivienda)
+                        </li>
+                        <li className="flex items-center gap-2 text-sm text-emerald-800">
+                          <Check className="h-4 w-4" />
+                          Aplica para Bono Familiar Habitacional (Techo
+                          Propio)
+                        </li>
+                      </ul>
+                    ) : (
+                      <ul className="space-y-2 text-sm text-rose-900">
+                        {!isFirstHome && (
+                          <li className="flex items-center gap-2">
+                            <X className="h-4 w-4" />
+                            No se trata de la primera vivienda del cliente.
+                          </li>
+                        )}
+                        {!(numericIncome >= 1200 && numericIncome <= 5000) && (
+                          <li className="flex items-center gap-2">
+                            <X className="h-4 w-4" />
+                            El ingreso familiar está fuera del rango
+                            referencial para estos bonos.
+                          </li>
+                        )}
+                        {numericIncome > 0 &&
+                          numericDebts > numericIncome * 0.4 && (
+                            <li className="flex items-center gap-2">
+                              <X className="h-4 w-4" />
+                              El nivel de endeudamiento es alto respecto al
+                              ingreso familiar.
+                            </li>
+                          )}
+                        <li className="flex items-center gap-2">
+                          <X className="h-4 w-4" />
+                          Este resultado es referencial y debe validarse con el
+                          banco.
+                        </li>
+                      </ul>
+                    )}
                   </div>
+
                   <div className="rounded-xl border border-slate-200 bg-white p-5">
-                    <p className="text-sm font-semibold text-slate-900 mb-4">
+                    <p className="mb-4 text-sm font-semibold text-slate-900">
                       Resumen del Cliente
                     </p>
                     <dl className="grid gap-4 md:grid-cols-2">
                       <div>
-                        <dt className="text-xs uppercase tracking-wide text-slate-400 mb-1">
+                        <dt className="mb-1 text-xs uppercase tracking-wide text-slate-400">
                           Nombre
                         </dt>
                         <dd className="text-sm font-medium text-slate-900">
@@ -838,7 +938,7 @@ export function ClientRegistrationForm({
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-xs uppercase tracking-wide text-slate-400 mb-1">
+                        <dt className="mb-1 text-xs uppercase tracking-wide text-slate-400">
                           DNI
                         </dt>
                         <dd className="text-sm font-medium text-slate-900">
@@ -846,7 +946,7 @@ export function ClientRegistrationForm({
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-xs uppercase tracking-wide text-slate-400 mb-1">
+                        <dt className="mb-1 text-xs uppercase tracking-wide text-slate-400">
                           Ingreso Familiar
                         </dt>
                         <dd className="text-sm font-medium text-slate-900">
@@ -854,7 +954,7 @@ export function ClientRegistrationForm({
                         </dd>
                       </div>
                       <div>
-                        <dt className="text-xs uppercase tracking-wide text-slate-400 mb-1">
+                        <dt className="mb-1 text-xs uppercase tracking-wide text-slate-400">
                           Primera Vivienda
                         </dt>
                         <dd className="text-sm font-medium text-emerald-600">
@@ -868,6 +968,7 @@ export function ClientRegistrationForm({
             </>
           )}
 
+          {/* BOTONES DE ACCIÓN */}
           {showFinalSuccess ? (
             <div className={styles.actionButtonsContainer}>
               <div className={styles.actionButtonsLeft} />
