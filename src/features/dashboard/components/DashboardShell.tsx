@@ -1108,8 +1108,8 @@ useEffect(() => {
 
         try {
           await updateClient(clientCreated.id, {
-            creditStatus: evaluatedStatus,
-          });
+            creditStatus: evaluatedStatus ,
+          }as any);
 
           alert(
             `Cliente registrado. Resultado inicial para el bono: ${evaluatedStatus}.`
@@ -1216,7 +1216,7 @@ useEffect(() => {
     try {
       const payload: UpdateClientDto = {
         propertyId: property.id,
-      };
+      }as any;
 
       const updated = await updateClient(activeClient.id, payload);
 
@@ -1325,7 +1325,7 @@ useEffect(() => {
       firstHome: client.firstHome ?? undefined,
       bank: client.bank ?? undefined,
       propertyId: client.propertyId ?? undefined,
-    });
+    }as any);
     setEditingError(null);
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -1409,7 +1409,7 @@ useEffect(() => {
       const updated = await updateClient(activeClient.id, {
         bonus: newBonusLabel,
         creditStatus: newCreditStatus,
-      });
+      }as any);
 
       setActiveClient(updated);
       setClients((prev) =>
@@ -1428,7 +1428,7 @@ useEffect(() => {
     try {
       const updated = await updateClient(activeClient.id, {
         creditStatus: newLabel,
-      });
+      }as any);
 
       setActiveClient(updated);
       setClients((prev) =>

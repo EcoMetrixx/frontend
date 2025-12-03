@@ -292,7 +292,7 @@ export function ClientRegistrationForm({
         bonus: undefined,
         bank: undefined,
         creditStatus: undefined,
-      };
+      }as any;
 
       await onSubmitClient(payload);
       setRegistrationCompleted(true);

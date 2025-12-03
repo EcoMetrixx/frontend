@@ -1,5 +1,4 @@
 // src/features/auth/services/authApi.ts
-import { apiClient } from "@/core/api/apiClient";
 
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:3001";
