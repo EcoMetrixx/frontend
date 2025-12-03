@@ -11,18 +11,152 @@ El objetivo es mantener una **estructura modular y escalable**, siguiendo princi
 ## 📂 Estructura recomendada de carpetas
 
 ```plaintext
-/frontend
+src/
+├─ app/                          # Rutas principales (App Router de Next.js)
+│  ├─ layout.tsx                 # Layout raíz (theme, providers globales)
+│  ├─ page.tsx                   # Redirección inicial (ej. /login)
+│  ├─ login/
+│  │   ├─ page.tsx               # Página de login
+│  │   ├─ layout.tsx             # Layout público (sin sidebar)
+│  ├─ dashboard/
+│  │   ├─ layout.tsx             # Layout privado con Sidebar, Navbar, etc.
+│  │   ├─ page.tsx               # Dashboard principal
+│  │   ├─ clientes/
+│  │   │   ├─ page.tsx           # Vista de clientes
+│  │   │   ├─ nuevo/
+│  │   │   │   └─ page.tsx       # Registrar cliente
+│  │   ├─ proyectos/
+│  │   │   └─ page.tsx           # Vista de proyectos / viviendas
+│  │   ├─ simulaciones/
+│  │   │   ├─ page.tsx           # Lista / módulo principal de simulaciones
+│  │   │   └─ nueva/
+│  │   │       └─ page.tsx       # Simulación de crédito (pantalla principal)
+│  │   ├─ bancos/
+│  │   │   └─ page.tsx           # Selección / gestión de entidades bancarias
+│  │   └─ reportes/
+│  │       └─ page.tsx           # Vista de reportes y estadísticas
+│  ├─ not-found.tsx              # Página 404 personalizada
+│  └─ error.tsx                  # Manejo global de errores
+
+├─ core/                         # Núcleo de la aplicación (config, auth, hooks globales)
+│  ├─ config/
+│  │   ├─ env.ts                 # Configuración de variables y entorno
+│  │   ├─ constants.ts           # Constantes globales (nombres, roles, etc.)
+│  ├─ providers/
+│  │   ├─ AuthProvider.tsx       # Contexto de autenticación
+│  │   ├─ ThemeProvider.tsx      # Contexto de tema Tailwind (light/dark)
+│  │   └─ index.tsx              # Combina todos los providers
+│  ├─ hooks/
+│  │   ├─ useAuth.ts             # Hook global de autenticación
+│  │   ├─ useTheme.ts            # Hook global de tema
+│  │   └─ useModal.ts            # Hook global para modales
+│  ├─ store/
+│  │   ├─ uiStore.ts             # Zustand store global (UI state)
+│  │   └─ sessionStore.ts        # Zustand store de sesión
+│  └─ utils/
+│      ├─ format.ts              # Formateadores (números, dinero, etc.)
+│      └─ validators.ts          # Validaciones genéricas
+
+├─ modules/                      # Módulos funcionales (DDD-style)
+│  ├─ clientes/
+│  │   ├─ components/            # Componentes específicos del módulo cliente
+│  │   │   ├─ ClienteForm.tsx
+│  │   │   ├─ ClienteCard.tsx
+│  │   │   └─ ClienteList.tsx
+│  │   ├─ services/
+│  │   │   ├─ cliente.api.ts     # Comunicación API
+│  │   │   └─ cliente.mapper.ts  # Mapear datos del backend
+│  │   ├─ hooks/
+│  │   │   └─ useClientes.ts
+│  │   └─ types/
+│  │       └─ cliente.types.ts
 │
-├─ /components     # Componentes reutilizables de UI
-├─ /features       # Funcionalidades o módulos de la aplicación
-│   ├─ /[feature]  # Cada feature contiene sus componentes, hooks y servicios
-├─ /pages          # Páginas de Next.js
-├─ /public         # Archivos estáticos (imágenes, fuentes)
-├─ /styles         # Archivos de estilos globales o utilitarios
-├─ /hooks          # Custom hooks globales
-├─ /services       # Comunicación con APIs (fetch/axios)
-├─ /context        # Contextos de React
-└─ /utils          # Funciones utilitarias
+│  ├─ simulaciones/
+│  │   ├─ components/
+│  │   │   ├─ SimuladorForm.tsx
+│  │   │   ├─ CronogramaTable.tsx
+│  │   │   └─ ResultadoResumen.tsx
+│  │   ├─ services/
+│  │   │   ├─ simulacion.api.ts
+│  │   │   └─ calculos.ts        # Funciones de cálculo financiero
+│  │   ├─ hooks/
+│  │   │   └─ useSimulacion.ts
+│  │   └─ types/
+│  │       └─ simulacion.types.ts
+│
+│  ├─ bancos/
+│  │   ├─ components/
+│  │   │   ├─ BancoCard.tsx
+│  │   │   └─ BancoList.tsx
+│  │   ├─ services/
+│  │   │   ├─ banco.api.ts
+│  │   │   └─ banco.utils.ts
+│  │   └─ types/
+│  │       └─ banco.types.ts
+│
+│  ├─ proyectos/
+│  │   ├─ components/
+│  │   │   ├─ ProyectoCard.tsx
+│  │   │   └─ ProyectoList.tsx
+│  │   ├─ services/
+│  │   │   ├─ proyecto.api.ts
+│  │   │   └─ proyecto.mapper.ts
+│  │   └─ types/
+│  │       └─ proyecto.types.ts
+│
+│  └─ reportes/
+│      ├─ components/
+│      │   ├─ ReporteResumen.tsx
+│      │   └─ GraficoTIRVAN.tsx
+│      ├─ services/
+│      │   └─ reporte.api.ts
+│      └─ types/
+│          └─ reporte.types.ts
+
+├─ components/                   # Componentes globales compartidos
+│  ├─ ui/                        # Basados en shadcn/ui o tailwind
+│  │   ├─ Button.tsx
+│  │   ├─ Input.tsx
+│  │   ├─ Select.tsx
+│  │   ├─ Modal.tsx
+│  │   └─ Card.tsx
+│  ├─ layout/
+│  │   ├─ Navbar.tsx
+│  │   ├─ Sidebar.tsx
+│  │   ├─ Footer.tsx
+│  │   └─ DashboardShell.tsx
+│  └─ feedback/
+│      ├─ Alert.tsx
+│      └─ Toast.tsx
+
+├─ services/                     # Servicios transversales (API, auth, http)
+│  ├─ api/
+│  │   ├─ httpClient.ts          # Axios configurado o fetch wrapper
+│  │   └─ interceptors.ts        # Manejo de errores, auth tokens, etc.
+│  ├─ auth/
+│  │   ├─ auth.api.ts
+│  │   └─ auth.utils.ts
+│  └─ storage/
+│      ├─ localStorage.ts
+│      └─ sessionStorage.ts
+
+├─ styles/
+│  ├─ globals.css                # Tailwind base y estilos globales
+│  └─ theme.css                  # Colores, variables, dark mode, etc.
+
+├─ lib/                          # Librerías auxiliares (recharts, date-fns, etc.)
+│  ├─ charts.ts
+│  ├─ date.ts
+│  └─ export.ts                  # Exportar PDF / Excel helpers
+
+├─ types/
+│  ├─ global.d.ts                # Tipos globales TS
+│  └─ api.d.ts                   # Tipos comunes de respuestas del backend
+
+└─ utils/                        # Utilidades globales sin dependencia de dominio
+   ├─ math.ts
+   ├─ formatters.ts
+   └─ validators.ts
 ```
 
 💡 **Tip:** Cada feature debe ser autocontenida: componentes, hooks y servicios asociados. Esto facilita escalabilidad y mantenimiento.
