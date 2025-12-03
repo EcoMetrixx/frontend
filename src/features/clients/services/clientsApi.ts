@@ -24,6 +24,7 @@ export interface ClientDto {
   debts?: number | null;
   firstHome?: boolean | null;
   notes?: string | null;
+  propertyId: string;
 }
 
 export interface ClientFilters {
