@@ -1,19 +1,78 @@
 "use client";
+
+import { useState, useEffect } from "react";
+import Image from "next/image";
 import { useAuth } from "@/core/providers/AuthProvider";
+import { LoginCard } from "@/features/auth/components/LoginCard";
+import { PasswordResetModal } from "@/features/auth/components/PasswordResetModal";
+import { CreateAccountModal } from "@/features/auth/components/CreateAccountModal";
+import { DashboardShell } from "@/features/dashboard/components/DashboardShell";
+import iconImage from "@/app/icon.png";
+import styles from "@/styles/login.module.css";
 
-// Pagina de prueba
+export default function HomePage() {
+    const { user, logout } = useAuth();
+    useEffect(() => {
+        try {
+            // eslint-disable-next-line no-console
+            console.log("HomePage: auth user changed", user);
+        } catch { }
+    }, [user]);
+    const [showRecoveryModal, setShowRecoveryModal] = useState(false);
+    const [showCreateAccountModal, setShowCreateAccountModal] = useState(false);
 
-export default function Home() {
-  const { user, login, logout } = useAuth();
-  
-  return (
-    <div>
-      <p>Usuario actual: { user ?? "Nadie logueado" }</p>
-      <button onClick={() => {
-        login("demo@ecometrix.com", "aaa");
-      }
-      }>Login</button>
-      <button onClick={logout}>Logout</button>
-    </div>
-  );
+    if (user) {
+        return (
+            <main className="min-h-screen bg-slate-50">
+                <DashboardShell user={user} onLogout={logout} />
+            </main>
+        );
+    }
+
+    return (
+        <main className={styles.loginPage}>
+            <div className={styles.loginContainer}>
+                <div className={styles.loginHaloTop} />
+                <div className={styles.loginHaloBottom} />
+
+                <div className={styles.loginHeader}>
+                    <div className={styles.loginIconContainer}>
+                        <Image
+                            src={iconImage}
+                            alt="Ecometrix Logo"
+                            width={64}
+                            height={64}
+                            className={styles.loginIcon}
+                        />
+                    </div>
+
+                    <p className={styles.loginTitle}>Ecometrix</p>
+
+                    <h1 className={styles.loginSubtitle}>
+                        Accede a tu panel de control
+                    </h1>
+
+                    <p className={styles.loginDescription}>
+                        Gestiona tus clientes MiVivienda y Techo Propio desde un solo lugar.
+                    </p>
+
+                    <div className={styles.loginCardWrapper}>
+                        <LoginCard
+                            onForgotPassword={() => setShowRecoveryModal(true)}
+                            onCreateAccount={() => setShowCreateAccountModal(true)}
+                        />
+                    </div>
+                </div>
+            </div>
+
+            <PasswordResetModal
+                open={showRecoveryModal}
+                onClose={() => setShowRecoveryModal(false)}
+            />
+            <CreateAccountModal
+                open={showCreateAccountModal}
+                onClose={() => setShowCreateAccountModal(false)}
+            />
+        </main>
+    );
 }
